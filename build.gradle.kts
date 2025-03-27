@@ -34,6 +34,7 @@ dependencies {
     implementation("org.bitcoinj:bitcoinj-core:0.16.2")
     implementation("org.web3j:core:4.9.7")
 
+    testImplementation("io.mockk:mockk:1.13.5")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }

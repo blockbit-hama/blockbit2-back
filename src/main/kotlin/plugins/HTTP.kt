@@ -1,4 +1,4 @@
-package com.sg
+package com.sg.plugins
 
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
