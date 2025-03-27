@@ -1,5 +1,6 @@
-package com.sg.services.wallet
+package service.wallet
 
+import com.sg.service.wallet.EthereumMpcService
 import kotlin.test.Test
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs

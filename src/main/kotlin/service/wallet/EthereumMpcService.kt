@@ -1,9 +1,9 @@
-package com.sg.services.wallet
+package com.sg.service.wallet
 
 import com.google.common.primitives.Bytes
 
-import com.sg.dtos.wallet.MpcWalletDTO
-import com.sg.dtos.wallet.PartialSignatureDTO
+import com.sg.dto.wallet.MpcWalletDTO
+import com.sg.dto.wallet.PartialSignatureDTO
 import org.slf4j.LoggerFactory
 import org.web3j.crypto.Hash
 import org.web3j.crypto.Keys

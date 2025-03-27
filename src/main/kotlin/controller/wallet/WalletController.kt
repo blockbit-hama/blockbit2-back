@@ -1,13 +1,12 @@
-package com.sg.controllers.wallet
+package com.sg.controller.wallet
 
-import com.sg.dtos.wallet.BitcoinCompleteRequestDTO
-import com.sg.dtos.wallet.BitcoinTransactionRequestDTO
-import com.sg.dtos.wallet.EthereumCompleteRequestDTO
-import com.sg.dtos.wallet.EthereumTransactionRequestDTO
-import com.sg.services.wallet.EthereumMpcService
-import com.sg.services.wallet.BitcoinMultiSigService
+import com.sg.dto.wallet.BitcoinCompleteRequestDTO
+import com.sg.dto.wallet.BitcoinTransactionRequestDTO
+import com.sg.dto.wallet.EthereumCompleteRequestDTO
+import com.sg.dto.wallet.EthereumTransactionRequestDTO
+import com.sg.service.wallet.BitcoinMultiSigService
+import com.sg.service.wallet.EthereumMpcService
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*

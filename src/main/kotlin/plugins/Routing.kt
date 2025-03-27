@@ -1,11 +1,11 @@
 package com.sg.plugins
 
-import com.sg.repositories.UserRepositoryImpl
-import com.sg.controllers.userRoutes
-import com.sg.services.UserService
-import com.sg.controllers.wallet.walletRoutes
-import com.sg.services.wallet.BitcoinMultiSigService
-import com.sg.services.wallet.EthereumMpcService
+import com.sg.controller.userRoutes
+import com.sg.controller.wallet.walletRoutes
+import com.sg.repository.UserRepositoryImpl
+import com.sg.service.UserService
+import com.sg.service.wallet.BitcoinMultiSigService
+import com.sg.service.wallet.EthereumMpcService
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*

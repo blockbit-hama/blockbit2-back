@@ -1,7 +1,7 @@
-package com.sg.controllers
+package com.sg.controller
 
-import com.sg.dtos.UserInfoDTO
-import com.sg.services.UserService
+import com.sg.dto.UserInfoDTO
+import com.sg.service.UserService
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*

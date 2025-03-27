@@ -1,5 +1,6 @@
-package com.sg.services.wallet
+package service.wallet
 
+import com.sg.service.wallet.BitcoinMultiSigService
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.core.Utils

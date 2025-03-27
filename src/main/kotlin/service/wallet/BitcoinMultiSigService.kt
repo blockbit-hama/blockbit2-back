@@ -1,7 +1,7 @@
-package com.sg.services.wallet
+package com.sg.service.wallet
 
-import com.sg.dtos.wallet.MultisigWalletDTO
-import com.sg.dtos.wallet.PartiallySignedTransactionDTO
+import com.sg.dto.wallet.MultisigWalletDTO
+import com.sg.dto.wallet.PartiallySignedTransactionDTO
 import org.bitcoinj.core.*
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.script.Script

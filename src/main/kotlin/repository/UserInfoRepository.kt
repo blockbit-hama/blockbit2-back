@@ -1,6 +1,6 @@
-package com.sg.repositories
+package com.sg.repository
 
-import com.sg.dtos.UserInfoDTO
+import com.sg.dto.UserInfoDTO
 import java.sql.Connection
 import java.sql.DriverManager
 

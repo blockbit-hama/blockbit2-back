@@ -1,4 +1,4 @@
-package com.sg.dtos
+package com.sg.dto
 
 import kotlinx.serialization.Serializable
 

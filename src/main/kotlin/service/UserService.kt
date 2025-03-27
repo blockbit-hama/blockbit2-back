@@ -1,7 +1,7 @@
-package com.sg.services
+package com.sg.service
 
-import com.sg.dtos.UserInfoDTO
-import com.sg.repositories.UserRepository
+import com.sg.dto.UserInfoDTO
+import com.sg.repository.UserRepository
 
 class UserService(private val repository: UserRepository) {
     suspend fun getAllUsers(): List<UserInfoDTO> {
