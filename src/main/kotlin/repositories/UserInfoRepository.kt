@@ -1,14 +1,14 @@
 package com.sg.repositories
 
-import com.sg.models.UserInfo
+import com.sg.models.UserInfoDTO
 import java.sql.Connection
 import java.sql.DriverManager
 
 interface UserRepository {
-    suspend fun getAll(): List<UserInfo>
-    suspend fun getById(id: Int): UserInfo?
-    suspend fun create(userInfo: UserInfo): UserInfo
-    suspend fun update(id: Int, userInfo: UserInfo): Boolean
+    suspend fun getAll(): List<UserInfoDTO>
+    suspend fun getById(id: Int): UserInfoDTO?
+    suspend fun create(userInfoDTO: UserInfoDTO): UserInfoDTO
+    suspend fun update(id: Int, userInfoDTO: UserInfoDTO): Boolean
     suspend fun delete(id: Int): Boolean
 }
 
@@ -21,14 +21,14 @@ class UserRepositoryImpl : UserRepository {
         )
     }
 
-    override suspend fun getAll(): List<UserInfo> {
-        val usi = mutableListOf<UserInfo>()
+    override suspend fun getAll(): List<UserInfoDTO> {
+        val usi = mutableListOf<UserInfoDTO>()
         val statement = connection.prepareStatement("SELECT * FROM USER_INFO")
         val resultSet = statement.executeQuery()
 
         while (resultSet.next()) {
             usi.add(
-                UserInfo(
+                UserInfoDTO(
                     usiNum = resultSet.getInt("USI_NUM"),
                     usiId = resultSet.getString("USI_ID"),
                     usiPwd = resultSet.getString("USI_PWD"),
@@ -40,13 +40,13 @@ class UserRepositoryImpl : UserRepository {
         return usi
     }
 
-    override suspend fun getById(id: Int): UserInfo? {
+    override suspend fun getById(id: Int): UserInfoDTO? {
         val statement = connection.prepareStatement("SELECT * FROM users WHERE id = ?")
         statement.setInt(1, id)
         val resultSet = statement.executeQuery()
 
         return if (resultSet.next()) {
-            UserInfo(
+            UserInfoDTO(
                 usiNum = resultSet.getInt("USI_NUM"),
                 usiId = resultSet.getString("USI_ID"),
                 usiPwd = resultSet.getString("USI_PWD"),
@@ -57,7 +57,7 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
-    override suspend fun create(usi: UserInfo): UserInfo {
+    override suspend fun create(usi: UserInfoDTO): UserInfoDTO {
         val statement = connection.prepareStatement(
             "INSERT INTO users (usiId, usiPwd, usiName) VALUES (?, ?, ?) RETURNING USI_NUM"
         )
@@ -74,7 +74,7 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
-    override suspend fun update(id: Int, usi: UserInfo): Boolean {
+    override suspend fun update(id: Int, usi: UserInfoDTO): Boolean {
         val statement = connection.prepareStatement(
             "UPDATE users SET USI_ID = ?, USI_PWD = ?, USI_NAME = ? WHERE USI_NUM = ?"
         )

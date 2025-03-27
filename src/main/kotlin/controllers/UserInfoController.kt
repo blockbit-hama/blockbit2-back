@@ -1,6 +1,6 @@
 package com.sg.routes
 
-import com.sg.models.UserInfo
+import com.sg.models.UserInfoDTO
 import com.sg.services.UserService
 import io.ktor.http.*
 import io.ktor.server.request.*
@@ -30,7 +30,7 @@ fun Route.userRoutes(userService: UserService) {
         }
 
         post {
-            val request = call.receive<UserInfo>()
+            val request = call.receive<UserInfoDTO>()
             val user = userService.createUser(request)
             call.respond(HttpStatusCode.Created, user)
         }
@@ -42,7 +42,7 @@ fun Route.userRoutes(userService: UserService) {
                 return@put
             }
 
-            val request = call.receive<UserInfo>()
+            val request = call.receive<UserInfoDTO>()
             val updated = userService.updateUser(id, request)
 
             if (updated) {

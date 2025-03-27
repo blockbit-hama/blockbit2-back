@@ -3,7 +3,7 @@ package com.sg.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserInfo(
+data class UserInfoDTO(
     val usiNum: Int? = null,
     val usiId: String? = null,
     val usiPwd: String? = null,
