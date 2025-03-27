@@ -32,6 +32,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
     implementation("org.bitcoinj:bitcoinj-core:0.16.2")
+    implementation("org.web3j:core:4.9.7")
 
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)

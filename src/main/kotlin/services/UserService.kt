@@ -1,6 +1,6 @@
 package com.sg.services
 
-import com.sg.models.UserInfoDTO
+import com.sg.dtos.UserInfoDTO
 import com.sg.repositories.UserRepository
 
 class UserService(private val repository: UserRepository) {

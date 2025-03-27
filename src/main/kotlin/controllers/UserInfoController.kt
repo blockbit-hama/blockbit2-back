@@ -1,6 +1,6 @@
-package com.sg.routes
+package com.sg.controllers
 
-import com.sg.models.UserInfoDTO
+import com.sg.dtos.UserInfoDTO
 import com.sg.services.UserService
 import io.ktor.http.*
 import io.ktor.server.request.*

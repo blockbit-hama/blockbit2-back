@@ -1,6 +1,6 @@
 package com.sg.repositories
 
-import com.sg.models.UserInfoDTO
+import com.sg.dtos.UserInfoDTO
 import java.sql.Connection
 import java.sql.DriverManager
 
