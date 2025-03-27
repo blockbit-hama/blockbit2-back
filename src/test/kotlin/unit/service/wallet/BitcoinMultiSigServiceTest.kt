@@ -1,4 +1,4 @@
-package service.wallet
+package unit.service.wallet
 
 import com.sg.service.wallet.BitcoinMultiSigService
 import org.bitcoinj.core.ECKey
