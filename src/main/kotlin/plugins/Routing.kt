@@ -1,9 +1,6 @@
 package com.sg.plugins
 
-import com.sg.controller.userRoutes
 import com.sg.controller.wallet.walletRoutes
-import com.sg.repository.UserRepositoryImpl
-import com.sg.service.UserService
 import com.sg.service.wallet.BitcoinMultiSigService
 import com.sg.service.wallet.EthereumMpcService
 import io.ktor.server.application.*
@@ -12,8 +9,8 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     // 의존성 주입을 위한 객체 생성
-    val userRepository = UserRepositoryImpl()
-    val userService = UserService(userRepository)
+    // val userRepository = UserRepositoryImpl()
+    // val userService = UserService(userRepository)
 
     // 지갑 서비스 객체 생성
     val bitcoinMultiSigService = BitcoinMultiSigService()
@@ -25,7 +22,7 @@ fun Application.configureRouting() {
         }
 
         // 사용자 관련 라우트
-        userRoutes(userService)
+        // userRoutes(userService)
 
         // 지갑 관련 라우트 추가
         walletRoutes(bitcoinMultiSigService, ethereumMpcService)
