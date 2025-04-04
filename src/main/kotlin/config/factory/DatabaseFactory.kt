@@ -1,4 +1,4 @@
-package com.sg.config
+package com.sg.config.factory
 
 import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers

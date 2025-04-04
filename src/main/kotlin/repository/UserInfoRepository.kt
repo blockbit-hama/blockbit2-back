@@ -1,10 +1,9 @@
 package com.sg.repository
 
-import com.sg.config.DatabaseFactory.dbQuery
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.UserInfoDTO
 import com.sg.dto.UserInfoResponseDTO
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.security.MessageDigest
 
 object UserInfoTable : Table("user_info") {
