@@ -33,6 +33,16 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     implementation("org.bitcoinj:bitcoinj-core:0.16.2")
     implementation("org.web3j:core:4.9.7")
+    
+    // Exposed 의존성 추가
+    implementation("org.jetbrains.exposed:exposed-core:0.45.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.45.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.45.0")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.45.0")
+    
+    // 코루틴 관련 의존성
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")
 
     testImplementation("io.mockk:mockk:1.13.5")
     testImplementation(libs.ktor.server.test.host)
