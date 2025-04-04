@@ -16,7 +16,6 @@ fun Route.walletRoutes(
     ethereumMpcService: EthereumMpcService
 ) {
     route("/api/wallet") {
-        // 비트코인 관련 라우트
         route("/bitcoin") {
             // 비트코인 멀티시그 지갑 생성
             post("/create") {
@@ -60,7 +59,6 @@ fun Route.walletRoutes(
             }
         }
 
-        // 이더리움 관련 라우트
         route("/ethereum") {
             // 이더리움 MPC 지갑 생성
             post("/create") {
