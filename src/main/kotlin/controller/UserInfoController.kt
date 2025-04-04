@@ -6,6 +6,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.http.Cookie
 
 fun Route.userInfoRoutes(userInfoService: UserInfoService) {
     route("/api/users") {
@@ -124,6 +125,17 @@ fun Route.userInfoRoutes(userInfoService: UserInfoService) {
                 val response = userInfoService.login(loginDTO)
                 
                 if (response != null && response.success) {
+                    // 토큰을 쿠키로 설정
+                    response.token?.let { token ->
+                        call.response.cookies.append(Cookie(
+                            name = "auth_token",
+                            value = token,
+                            maxAge = environment.config.property("jwt.expiration-time").getString().toInt(),
+                            path = "/",
+                            secure = false,
+                            httpOnly = true
+                        ))
+                    }
                     call.respond(HttpStatusCode.OK, response)
                 } else {
                     call.respond(HttpStatusCode.Unauthorized, response ?: "Login failed")

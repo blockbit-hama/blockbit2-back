@@ -1,11 +1,9 @@
 package com.sg.plugins
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
 import com.sg.utils.JwtUtil
+import io.ktor.http.auth.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.auth.jwt.*
 
 fun Application.configureJwtAuthentication() {
@@ -25,6 +23,20 @@ fun Application.configureJwtAuthentication() {
                 } else {
                     null
                 }
+            }
+            
+            authHeader { call ->
+                val authHeader = call.request.headers["Authorization"]
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    return@authHeader HttpAuthHeader.Single("Bearer", authHeader.substring(7))
+                }
+                
+                val token = call.request.cookies["auth_token"]
+                if (token != null) {
+                    return@authHeader HttpAuthHeader.Single("Bearer", token)
+                }
+                
+                null
             }
         }
     }
