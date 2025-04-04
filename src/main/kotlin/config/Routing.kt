@@ -2,6 +2,7 @@ package com.sg.config
 
 import com.sg.controller.userInfoRoutes
 import com.sg.controller.wallet.walletRoutes
+import com.sg.controller.protectedRoutes
 import com.sg.repository.UserInfoRepository
 import com.sg.service.UserInfoService
 import com.sg.service.wallet.BitcoinMultiSigService
@@ -21,6 +22,7 @@ fun Application.configureRouting() {
         get("/") {
             call.respondText("Hello Ktor!")
         }
+        protectedRoutes()
         userInfoRoutes(userInfoService)
         walletRoutes(bitcoinMultiSigService, ethereumMpcService)
     }

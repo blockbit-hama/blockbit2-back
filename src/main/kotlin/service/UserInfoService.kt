@@ -4,7 +4,7 @@ import com.sg.dto.*
 import com.sg.repository.UserInfoRepository
 import java.security.MessageDigest
 
-class UserInfoService(private val repository: UserInfoRepository) {
+class UserInfoService(private val repository: UserInfoRepository = UserInfoRepository()) {
     
     // 모든 사용자 목록 조회
     suspend fun getAllUsers(): List<UserInfoResponseDTO> {
@@ -79,7 +79,8 @@ class UserInfoService(private val repository: UserInfoRepository) {
                 usiId = "",
                 usiName = "",
                 success = false,
-                message = "아이디 또는 비밀번호가 일치하지 않습니다."
+                message = "아이디 또는 비밀번호가 일치하지 않습니다.",
+                token = null
             )
         }
         
@@ -90,7 +91,8 @@ class UserInfoService(private val repository: UserInfoRepository) {
                 usiId = "",
                 usiName = "",
                 success = false,
-                message = "비활성화된 계정입니다."
+                message = "비활성화된 계정입니다.",
+                token = null
             )
         }
         
@@ -99,10 +101,14 @@ class UserInfoService(private val repository: UserInfoRepository) {
         val currentTime = DateTimeUtil.getCurrentTime()
         repository.updateLoginTime(user.usiNum!!, currentDate, currentTime)
         
+        // JWT 토큰 생성
+        val token = com.sg.utils.JwtUtil.generateToken(user.usiId, user.usiNum)
+        
         return LoginResponseDTO(
             usiNum = user.usiNum,
             usiId = user.usiId,
-            usiName = user.usiName
+            usiName = user.usiName,
+            token = token
         )
     }
     

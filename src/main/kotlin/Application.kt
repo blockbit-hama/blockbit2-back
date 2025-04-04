@@ -5,6 +5,7 @@ import com.sg.config.configureCORS
 import com.sg.config.configureHTTPSRedirect
 import com.sg.config.configureRouting
 import com.sg.config.configureSerialization
+import com.sg.plugins.configureJwtAuthentication
 import io.ktor.server.application.*
 
 fun main(args: Array<String> = emptyArray()) {
@@ -13,7 +14,8 @@ fun main(args: Array<String> = emptyArray()) {
 
 fun Application.module() {
     DatabaseFactory.init(environment)
-    
+
+    configureJwtAuthentication()
     configureRouting()
     configureSerialization()
     configureCORS()

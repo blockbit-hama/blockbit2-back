@@ -48,7 +48,8 @@ data class LoginResponseDTO(
     val usiId: String,
     val usiName: String,
     val success: Boolean = true,
-    val message: String = "로그인 성공"
+    val message: String = "로그인 성공",
+    val token: String? = null
 )
 
 // 비밀번호를 제외한 사용자 정보를 반환하는 DTO

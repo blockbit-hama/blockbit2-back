@@ -25,6 +25,9 @@ dependencies {
     implementation(libs.ktor.serialization.gson)
     implementation(libs.ktor.server.http.redirect)
     implementation(libs.ktor.server.cors)
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
+    implementation("com.auth0:java-jwt:4.4.0")
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.postgresql)
     implementation(libs.h2)
@@ -47,4 +50,9 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.5")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+
+    // JWT 의존성 추가
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }
