@@ -1,4 +1,4 @@
-package com.sg.plugins
+package com.sg.config
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*

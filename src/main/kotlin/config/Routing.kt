@@ -1,4 +1,4 @@
-package com.sg.plugins
+package com.sg.config
 
 import com.sg.controller.userInfoRoutes
 import com.sg.controller.wallet.walletRoutes
