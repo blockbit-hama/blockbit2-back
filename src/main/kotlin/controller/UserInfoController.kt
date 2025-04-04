@@ -58,7 +58,7 @@ fun Route.userInfoRoutes(userInfoService: UserInfoService) {
             try {
                 val userDTO = call.receive<UserInfoDTO>()
                 val usiNum = userInfoService.addUser(userDTO)
-                call.respond(HttpStatusCode.Created, mapOf("usiNum" to usiNum, "message" to "User created successfully"))
+                call.respond(HttpStatusCode.Created, mapOf("usiNum" to usiNum.toString(), "message" to "User created successfully"))
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Failed to create user: ${e.message}")
             }
