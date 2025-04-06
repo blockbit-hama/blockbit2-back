@@ -13,6 +13,7 @@ fun Application.configureCORS() {
         allowMethod(HttpMethod.Delete)
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
-        anyHost() // 프로덕션에서는 특정 호스트만 허용하는 것이 좋습니다
+        allowCredentials = true
+        allowHost("localhost:3000", schemes = listOf("http"))
     }
 }

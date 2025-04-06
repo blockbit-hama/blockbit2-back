@@ -52,9 +52,9 @@ class UserInfoRepository {
     }
 
     // 비밀번호 체크를 위한 유저 조회 (비밀번호 포함)
-    suspend fun getUserForAuthentication(id: String): UserInfoDTO? = dbQuery {
+    suspend fun getUserForAuthentication(email: String): UserInfoDTO? = dbQuery {
         UserInfoTable
-            .select { UserInfoTable.usiId eq id }
+            .select { UserInfoTable.usiEmail eq email }
             .map { resultRowToUserDTO(it) }
             .singleOrNull()
     }

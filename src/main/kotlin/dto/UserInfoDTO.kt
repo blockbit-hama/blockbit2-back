@@ -29,7 +29,7 @@ data class UserInfoDTO(
 // Password만 변경하는 DTO
 @Serializable
 data class ChangePasswordDTO(
-    val usiId: String,
+    val usiEmail: String,
     val currentPassword: String,
     val newPassword: String
 )
@@ -37,7 +37,7 @@ data class ChangePasswordDTO(
 // 사용자 로그인 DTO
 @Serializable
 data class LoginDTO(
-    val usiId: String,
+    val usiEmail: String,
     val usiPwd: String
 )
 
@@ -45,7 +45,7 @@ data class LoginDTO(
 @Serializable
 data class LoginResponseDTO(
     val usiNum: Int,
-    val usiId: String,
+    val usiEmail: String,
     val usiName: String,
     val success: Boolean = true,
     val message: String = "로그인 성공",

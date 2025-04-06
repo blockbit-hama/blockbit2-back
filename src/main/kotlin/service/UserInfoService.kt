@@ -53,7 +53,7 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
     
     // 사용자 비밀번호 변경
     suspend fun changePassword(changePasswordDTO: ChangePasswordDTO): Boolean {
-        val user = repository.getUserForAuthentication(changePasswordDTO.usiId) ?: return false
+        val user = repository.getUserForAuthentication(changePasswordDTO.usiEmail) ?: return false
         
         // 현재 비밀번호 확인
         if (user.usiPwd != hashPassword(changePasswordDTO.currentPassword)) {
@@ -70,13 +70,13 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
     
     // 로그인 처리
     suspend fun login(loginDTO: LoginDTO): LoginResponseDTO? {
-        val user = repository.getUserForAuthentication(loginDTO.usiId) ?: return null
+        val user = repository.getUserForAuthentication(loginDTO.usiEmail) ?: return null
         
         // 비밀번호 검증
         if (user.usiPwd != hashPassword(loginDTO.usiPwd)) {
             return LoginResponseDTO(
                 usiNum = 0,
-                usiId = "",
+                usiEmail = "",
                 usiName = "",
                 success = false,
                 message = "아이디 또는 비밀번호가 일치하지 않습니다.",
@@ -88,7 +88,7 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
         if (user.active != "1") {
             return LoginResponseDTO(
                 usiNum = 0,
-                usiId = "",
+                usiEmail = "",
                 usiName = "",
                 success = false,
                 message = "비활성화된 계정입니다.",
@@ -102,11 +102,11 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
         repository.updateLoginTime(user.usiNum!!, currentDate, currentTime)
         
         // JWT 토큰 생성
-        val token = com.sg.utils.JwtUtil.generateToken(user.usiId, user.usiNum)
+        val token = com.sg.utils.JwtUtil.generateToken(user.usiEmail, user.usiNum)
         
         return LoginResponseDTO(
             usiNum = user.usiNum,
-            usiId = user.usiId,
+            usiEmail = user.usiEmail,
             usiName = user.usiName,
             token = token
         )
