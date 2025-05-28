@@ -2,6 +2,7 @@ package com.sg
 
 import com.sg.config.factory.DatabaseFactory
 import com.sg.config.configureCORS
+import com.sg.config.configureExceptionHandling
 import com.sg.config.configureHTTPSRedirect
 import com.sg.config.configureRouting
 import com.sg.config.configureSerialization
@@ -17,6 +18,7 @@ fun Application.module() {
     DatabaseFactory.init(environment)
     JwtUtil.init(environment)
 
+    configureExceptionHandling()
     configureJwtAuthentication()
     configureRouting()
     configureSerialization()

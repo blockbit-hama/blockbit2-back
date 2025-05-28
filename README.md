@@ -8,6 +8,27 @@ Here are some useful links to get you started:
 - [Ktor GitHub page](https://github.com/ktorio/ktor)
 - The [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). You'll need to [request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up) to join.
 
+## API Response Format
+
+### Success Response
+```json
+{
+  "success": true,
+  "data": {...},
+  "message": "Operation completed successfully"
+}
+```
+
+### Error Response
+```json
+{
+  "success": false,
+  "error": "Bad Request",
+  "message": "Detailed error message",
+  "timestamp": "2025-05-28T10:30:00"
+}
+```
+
 ## Features
 
 Here's a list of features included in this project:
