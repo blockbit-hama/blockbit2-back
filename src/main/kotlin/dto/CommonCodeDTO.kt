@@ -3,6 +3,8 @@ package com.sg.dto
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.ResultRow
 import com.sg.repository.CommonCodeTable
+import com.sg.dto.common.CommonResponseDTO
+import com.sg.dto.common.CommonRequestDTO
 
 @Serializable
 data class CommonCodeRequestDTO(
@@ -11,7 +13,7 @@ data class CommonCodeRequestDTO(
     val codKey: String,         // 코드 키 (예: 1, 2, 3)
     val codVal: String,         // 코드 값 (예: Admin, User, Guest)
     val codDesc: String? = null // 코드 설명
-) {
+) : CommonRequestDTO() {
     init {
         require(codType.isNotBlank()) { "Code type cannot be blank" }
         require(codKey.isNotBlank()) { "Code key cannot be blank" }
@@ -32,14 +34,14 @@ data class CommonCodeResponseDTO(
     val codDesc: String?,       // 코드 설명
     
     // 공통 컬럼
-    val creusr: Int?,           // 생성자
-    val credat: String?,        // 생성일자 (YYYYMMDD)
-    val cretim: String?,        // 생성시간 (HHMMSS)
-    val lmousr: Int?,           // 수정자
-    val lmodat: String?,        // 수정일자 (YYYYMMDD)
-    val lmotim: String?,        // 수정시간 (HHMMSS)
-    val active: String          // 활성여부 ('1'=활성, '0'=비활성)
-) {
+    override val creusr: Int?,           // 생성자
+    override val credat: String?,        // 생성일자 (YYYYMMDD)
+    override val cretim: String?,        // 생성시간 (HHMMSS)
+    override val lmousr: Int?,           // 수정자
+    override val lmodat: String?,        // 수정일자 (YYYYMMDD)
+    override val lmotim: String?,        // 수정시간 (HHMMSS)
+    override val active: String          // 활성여부 ('1'=활성, '0'=비활성)
+) : CommonResponseDTO() {
     companion object {
         fun fromResultRow(row: ResultRow): CommonCodeResponseDTO {
             return CommonCodeResponseDTO(

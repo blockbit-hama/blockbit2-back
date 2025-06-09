@@ -1,6 +1,10 @@
 package com.sg.dto
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.exposed.sql.ResultRow
+import com.sg.repository.UserInfoTable
+import com.sg.dto.common.CommonResponseDTO
+import com.sg.dto.common.CommonRequestDTO
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -17,14 +21,16 @@ data class UserInfoDTO(
     val usiLoginTim: String? = null,
     val usiLastLoginDat: String? = null,
     val usiLastLoginTim: String? = null,
-    val creusr: Int? = null,
-    val credat: String? = null,
-    val cretim: String? = null,
-    val lmousr: Int? = null,
-    val lmodat: String? = null,
-    val lmotim: String? = null,
-    val active: String = "1"
-)
+    
+    // 공통 컬럼
+    override val creusr: Int? = null,
+    override val credat: String? = null,
+    override val cretim: String? = null,
+    override val lmousr: Int? = null,
+    override val lmodat: String? = null,
+    override val lmotim: String? = null,
+    override val active: String = "1"
+) : CommonResponseDTO()
 
 // Password만 변경하는 DTO
 @Serializable
@@ -32,14 +38,14 @@ data class ChangePasswordDTO(
     val usiEmail: String,
     val currentPassword: String,
     val newPassword: String
-)
+) : CommonRequestDTO()
 
 // 사용자 로그인 DTO
 @Serializable
 data class LoginDTO(
     val usiEmail: String,
     val usiPwd: String
-)
+) : CommonRequestDTO()
 
 // 로그인 응답 DTO
 @Serializable
@@ -64,8 +70,40 @@ data class UserInfoResponseDTO(
     val usiLoginTim: String? = null,
     val usiLastLoginDat: String? = null,
     val usiLastLoginTim: String? = null,
-    val active: String
-)
+    
+    // 공통 컬럼
+    override val creusr: Int? = null,
+    override val credat: String? = null,
+    override val cretim: String? = null,
+    override val lmousr: Int? = null,
+    override val lmodat: String? = null,
+    override val lmotim: String? = null,
+    override val active: String = "1"
+) : CommonResponseDTO() {
+    
+    companion object {
+        fun fromResultRow(row: ResultRow): UserInfoResponseDTO {
+            return UserInfoResponseDTO(
+                usiNum = row[UserInfoTable.usiNum],
+                usiId = row[UserInfoTable.usiId],
+                usiName = row[UserInfoTable.usiName],
+                usiPhoneNum = row[UserInfoTable.usiPhoneNum],
+                usiEmail = row[UserInfoTable.usiEmail],
+                usiLoginDat = row[UserInfoTable.usiLoginDat],
+                usiLoginTim = row[UserInfoTable.usiLoginTim],
+                usiLastLoginDat = row[UserInfoTable.usiLastLoginDat],
+                usiLastLoginTim = row[UserInfoTable.usiLastLoginTim],
+                creusr = row[UserInfoTable.creusr],
+                credat = row[UserInfoTable.credat],
+                cretim = row[UserInfoTable.cretim],
+                lmousr = row[UserInfoTable.lmousr],
+                lmodat = row[UserInfoTable.lmodat],
+                lmotim = row[UserInfoTable.lmotim],
+                active = row[UserInfoTable.active]
+            )
+        }
+    }
+}
 
 // 현재 날짜와 시간을 얻는 유틸리티 함수
 object DateTimeUtil {
