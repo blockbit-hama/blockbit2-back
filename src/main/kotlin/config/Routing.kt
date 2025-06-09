@@ -1,8 +1,7 @@
 package com.sg.config
 
-import com.sg.controller.userInfoRoutes
-import com.sg.controller.protectedRoutes
-import com.sg.controller.commonCodeRoutes
+import com.sg.route.userInfoRoute
+import com.sg.route.commonCodeRoute
 import com.sg.repository.UserInfoRepository
 import com.sg.repository.CommonCodeRepository
 import com.sg.service.UserInfoService
@@ -22,8 +21,7 @@ fun Application.configureRouting() {
         get("/") {
             call.respondText("Hello Ktor!")
         }
-        protectedRoutes()
-        userInfoRoutes(userInfoService)
-        commonCodeRoutes(commonCodeService)
+        userInfoRoute(userInfoService)
+        commonCodeRoute(commonCodeService)
     }
 }

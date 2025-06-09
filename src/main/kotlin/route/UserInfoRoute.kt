@@ -1,4 +1,4 @@
-package com.sg.controller
+package com.sg.route
 
 import com.sg.dto.*
 import com.sg.dto.common.SimpleSuccessResponse
@@ -13,7 +13,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.http.Cookie
 
-fun Route.userInfoRoutes(userInfoService: UserInfoService) {
+fun Route.userInfoRoute(userInfoService: UserInfoService) {
     route("/api/users") {
         // 모든 사용자 조회
         get {

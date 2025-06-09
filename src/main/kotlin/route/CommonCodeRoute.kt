@@ -1,4 +1,4 @@
-package com.sg.controller
+package com.sg.route
 
 import com.sg.dto.CommonCodeRequestDTO
 import com.sg.dto.common.SimpleSuccessResponse
@@ -14,7 +14,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.commonCodeRoutes(commonCodeService: CommonCodeService) {
+fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
     authenticate("jwt-auth") {
         route("/api/cod") {
             
