@@ -22,7 +22,7 @@ fun Route.commonCodeRoutes(commonCodeService: CommonCodeService) {
                 val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
                 val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
 
-                val result = commonCodeService.selectCodList(offset, limit)
+                val result = commonCodeService.selectCODList(offset, limit)
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
             
@@ -30,7 +30,7 @@ fun Route.commonCodeRoutes(commonCodeService: CommonCodeService) {
                 val codNum = call.parameters["codNum"]?.toIntOrNull()
                     ?: throw BadRequestException("Valid cod_num is required")
 
-                val result = commonCodeService.selectCod(codNum)
+                val result = commonCodeService.selectCOD(codNum)
                     ?: throw NotFoundException("Common code not found")
 
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
@@ -42,7 +42,7 @@ fun Route.commonCodeRoutes(commonCodeService: CommonCodeService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<CommonCodeRequestDTO>()
-                val codNum = commonCodeService.insertCod(request, userId)
+                val codNum = commonCodeService.insertCOD(request, userId)
 
                 call.respond(
                     HttpStatusCode.Created,
@@ -59,7 +59,7 @@ fun Route.commonCodeRoutes(commonCodeService: CommonCodeService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<CommonCodeRequestDTO>()
-                val result = commonCodeService.updateCod(request, userId)
+                val result = commonCodeService.updateCOD(request, userId)
 
                 if (!result) throw NotFoundException("Common code not found")
                 
@@ -77,7 +77,7 @@ fun Route.commonCodeRoutes(commonCodeService: CommonCodeService) {
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
                 
-                val result = commonCodeService.deleteCod(codNum, userId)
+                val result = commonCodeService.deleteCOD(codNum, userId)
                 if (!result) throw NotFoundException("Common code not found")
                 
                 call.respond(

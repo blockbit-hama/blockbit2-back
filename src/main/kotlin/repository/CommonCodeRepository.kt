@@ -24,7 +24,7 @@ object CommonCodeTable : Table("common_code") {
 
 class CommonCodeRepository {
 
-    suspend fun selectCodList(offset: Int, limit: Int): List<CommonCodeResponseDTO> {
+    suspend fun selectCODList(offset: Int, limit: Int): List<CommonCodeResponseDTO> {
         return newSuspendedTransaction {
             val query = CommonCodeTable
                 .select { CommonCodeTable.active eq "1" }
@@ -35,7 +35,7 @@ class CommonCodeRepository {
         }
     }
 
-    suspend fun selectCod(codNum: Int): CommonCodeResponseDTO? {
+    suspend fun selectCOD(codNum: Int): CommonCodeResponseDTO? {
         return newSuspendedTransaction {
             CommonCodeTable
                 .select { (CommonCodeTable.codNum eq codNum) and (CommonCodeTable.active eq "1") }
@@ -44,7 +44,7 @@ class CommonCodeRepository {
         }
     }
 
-    suspend fun insertCod(
+    suspend fun insertCOD(
         request: CommonCodeRequestDTO,
         creusr: Int,
         credat: String,
@@ -71,7 +71,7 @@ class CommonCodeRepository {
         }
     }
 
-    suspend fun updateCod(
+    suspend fun updateCOD(
         requestDTO: CommonCodeRequestDTO,
         lmousr: Int,
         lmodat: String,
@@ -93,7 +93,7 @@ class CommonCodeRepository {
         }
     }
 
-    suspend fun deleteCod(codNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
+    suspend fun deleteCOD(codNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
         return newSuspendedTransaction {
             val updateCount = CommonCodeTable.update(
                 where = { (CommonCodeTable.codNum eq codNum) and (CommonCodeTable.active eq "1") }
