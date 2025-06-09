@@ -58,4 +58,26 @@ object JwtUtil {
             null
         }
     }
+
+    /**
+     * JWT Principal에서 사용자 ID를 추출
+     */
+    fun extractUserId(principal: io.ktor.server.auth.jwt.JWTPrincipal): Int? {
+        return try {
+            principal.payload.getClaim("usiNum").asInt()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * JWT Principal에서 사용자 로그인 ID를 추출
+     */
+    fun extractUserLoginId(principal: io.ktor.server.auth.jwt.JWTPrincipal): String? {
+        return try {
+            principal.payload.subject
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
