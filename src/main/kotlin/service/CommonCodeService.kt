@@ -2,7 +2,6 @@ package com.sg.service
 
 import com.sg.dto.CommonCodeRequestDTO
 import com.sg.dto.CommonCodeResponseDTO
-import com.sg.dto.CommonCodeUpdateDTO
 import com.sg.repository.CommonCodeRepository
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -32,21 +31,24 @@ class CommonCodeService(
             request = request,
             creusr = userId,
             credat = currentDate,
-            cretim = currentTime
+            cretim = currentTime,
+            lmousr = userId,
+            lmodat = currentDate,
+            lmotim = currentTime
         )
     }
 
-    suspend fun updateCod(updateDTO: CommonCodeUpdateDTO, userId: Int): Boolean {
-        require(updateDTO.codType.isNotBlank()) { "Code type is required" }
-        require(updateDTO.codKey.isNotBlank()) { "Code key is required" }
-        require(updateDTO.codVal.isNotBlank()) { "Code value is required" }
+    suspend fun updateCod(requestDTO: CommonCodeRequestDTO, userId: Int): Boolean {
+        require(requestDTO.codType.isNotBlank()) { "Code type is required" }
+        require(requestDTO.codKey.isNotBlank()) { "Code key is required" }
+        require(requestDTO.codVal.isNotBlank()) { "Code value is required" }
 
         val now = LocalDateTime.now()
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
         return commonCodeRepository.updateCod(
-            updateDTO = updateDTO,
+            requestDTO = requestDTO,
             lmousr = userId,
             lmodat = currentDate,
             lmotim = currentTime

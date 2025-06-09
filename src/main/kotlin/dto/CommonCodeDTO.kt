@@ -6,32 +6,13 @@ import com.sg.repository.CommonCodeTable
 
 @Serializable
 data class CommonCodeRequestDTO(
+    val codNum: Int? = null,
     val codType: String,        // 코드 타입 (예: docRoleType, status)
     val codKey: String,         // 코드 키 (예: 1, 2, 3)
     val codVal: String,         // 코드 값 (예: Admin, User, Guest)
     val codDesc: String? = null // 코드 설명
 ) {
     init {
-        require(codType.isNotBlank()) { "Code type cannot be blank" }
-        require(codKey.isNotBlank()) { "Code key cannot be blank" }
-        require(codVal.isNotBlank()) { "Code value cannot be blank" }
-        require(codType.length <= 50) { "Code type must be 50 characters or less" }
-        require(codKey.length <= 20) { "Code key must be 20 characters or less" }
-        require(codVal.length <= 100) { "Code value must be 100 characters or less" }
-        require(codDesc == null || codDesc.length <= 200) { "Code description must be 200 characters or less" }
-    }
-}
-
-@Serializable
-data class CommonCodeUpdateDTO(
-    val codNum: Int,            // 코드 번호
-    val codType: String,        // 코드 타입
-    val codKey: String,         // 코드 키
-    val codVal: String,         // 코드 값
-    val codDesc: String? = null // 코드 설명
-) {
-    init {
-        require(codNum > 0) { "Code number must be positive" }
         require(codType.isNotBlank()) { "Code type cannot be blank" }
         require(codKey.isNotBlank()) { "Code key cannot be blank" }
         require(codVal.isNotBlank()) { "Code value cannot be blank" }

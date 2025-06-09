@@ -2,9 +2,7 @@ package com.sg.repository
 
 import com.sg.dto.CommonCodeRequestDTO
 import com.sg.dto.CommonCodeResponseDTO
-import com.sg.dto.CommonCodeUpdateDTO
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 object CommonCodeTable : Table("common_code") {
@@ -50,7 +48,10 @@ class CommonCodeRepository {
         request: CommonCodeRequestDTO,
         creusr: Int,
         credat: String,
-        cretim: String
+        cretim: String,
+        lmousr: Int,
+        lmodat: String,
+        lmotim: String
     ): Int {
         return newSuspendedTransaction {
             val insertStatement = CommonCodeTable.insert {
@@ -61,6 +62,9 @@ class CommonCodeRepository {
                 it[CommonCodeTable.creusr] = creusr
                 it[CommonCodeTable.credat] = credat
                 it[CommonCodeTable.cretim] = cretim
+                it[CommonCodeTable.lmousr] = lmousr
+                it[CommonCodeTable.lmodat] = lmodat
+                it[CommonCodeTable.lmotim] = lmotim
                 it[active] = "1"
             }
             insertStatement[CommonCodeTable.codNum]
@@ -68,19 +72,19 @@ class CommonCodeRepository {
     }
 
     suspend fun updateCod(
-        updateDTO: CommonCodeUpdateDTO,
+        requestDTO: CommonCodeRequestDTO,
         lmousr: Int,
         lmodat: String,
         lmotim: String
     ): Boolean {
         return newSuspendedTransaction {
             val updateCount = CommonCodeTable.update(
-                where = { (CommonCodeTable.codNum eq updateDTO.codNum) and (CommonCodeTable.active eq "1") }
+                where = { (CommonCodeTable.codNum eq requestDTO.codNum as Int) and (CommonCodeTable.active eq "1") }
             ) {
-                it[codType] = updateDTO.codType
-                it[codKey] = updateDTO.codKey
-                it[codVal] = updateDTO.codVal
-                it[codDesc] = updateDTO.codDesc
+                it[codType] = requestDTO.codType
+                it[codKey] = requestDTO.codKey
+                it[codVal] = requestDTO.codVal
+                it[codDesc] = requestDTO.codDesc
                 it[CommonCodeTable.lmousr] = lmousr
                 it[CommonCodeTable.lmodat] = lmodat
                 it[CommonCodeTable.lmotim] = lmotim

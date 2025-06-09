@@ -1,7 +1,6 @@
 package com.sg.controller
 
 import com.sg.dto.CommonCodeRequestDTO
-import com.sg.dto.CommonCodeUpdateDTO
 import com.sg.dto.common.SimpleSuccessResponse
 import com.sg.dto.common.SuccessResponse
 import com.sg.exception.BadRequestException
@@ -54,24 +53,14 @@ fun Route.commonCodeRoutes(commonCodeService: CommonCodeService) {
                 )
             }
             
-            put("/{codNum}") {
-                val codNum = call.parameters["codNum"]?.toIntOrNull()
-                    ?: throw BadRequestException("Valid cod_num is required")
-                
+            put {
                 val principal = call.principal<JWTPrincipal>()
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
-                
+
                 val request = call.receive<CommonCodeRequestDTO>()
-                val updateDTO = CommonCodeUpdateDTO(
-                    codNum = codNum,
-                    codType = request.codType,
-                    codKey = request.codKey,
-                    codVal = request.codVal,
-                    codDesc = request.codDesc
-                )
-                
-                val result = commonCodeService.updateCod(updateDTO, userId)
+                val result = commonCodeService.updateCod(request, userId)
+
                 if (!result) throw NotFoundException("Common code not found")
                 
                 call.respond(
