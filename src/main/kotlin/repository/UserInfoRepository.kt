@@ -3,8 +3,8 @@ package com.sg.repository
 import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.UserInfoDTO
 import com.sg.dto.UserInfoResponseDTO
+import com.sg.utils.PasswordUtil
 import org.jetbrains.exposed.sql.*
-import java.security.MessageDigest
 
 object UserInfoTable : Table("user_info") {
     val usiNum = integer("usi_num").autoIncrement()
@@ -62,7 +62,7 @@ class UserInfoRepository {
     // 유저 생성
     suspend fun addUser(userInfo: UserInfoDTO): Int = dbQuery {
         // 비밀번호 해시
-        val hashedPassword = hashPassword(userInfo.usiPwd ?: "")
+        val hashedPassword = PasswordUtil.hashPassword(userInfo.usiPwd ?: "")
         
         UserInfoTable.insert {
             it[usiId] = userInfo.usiId
@@ -106,7 +106,7 @@ class UserInfoRepository {
 
     // 비밀번호 업데이트
     suspend fun updatePassword(usiNum: Int, newPassword: String): Boolean = dbQuery {
-        val hashedPassword = hashPassword(newPassword)
+        val hashedPassword = PasswordUtil.hashPassword(newPassword)
         val updateResult = UserInfoTable.update({ UserInfoTable.usiNum eq usiNum }) {
             it[usiPwd] = hashedPassword
         }
@@ -135,12 +135,6 @@ class UserInfoRepository {
             if (lastLoginTim != null) it[usiLastLoginTim] = lastLoginTim
         }
         updateResult > 0
-    }
-
-    // 비밀번호 해시 함수
-    private fun hashPassword(password: String): String {
-        val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
     }
 
     // ResultRow를 DTO로 변환하는 함수

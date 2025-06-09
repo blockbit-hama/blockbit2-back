@@ -93,12 +93,12 @@ fun Route.userInfoRoutes(userInfoService: UserInfoService) {
                 throw UnauthorizedException("Login failed")
             }
             
-            // 토큰을 쿠키로 설정
+            // 토큰을 쿠키로 설정 (24시간)
             response.token?.let { token ->
                 call.response.cookies.append(Cookie(
                     name = "auth_token",
                     value = token,
-                    maxAge = environment.config.property("jwt.expiration-time").getString().toInt(),
+                    maxAge = 86400000, // 24시간 (밀리초)
                     path = "/",
                     secure = false,
                     httpOnly = true

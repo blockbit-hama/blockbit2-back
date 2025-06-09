@@ -11,3 +11,4 @@ class BadRequestException(message: String = "Bad Request") : ApiException(HttpSt
 class NotFoundException(message: String = "Not Found") : ApiException(HttpStatusCode.NotFound, message)
 class UnauthorizedException(message: String = "Unauthorized") : ApiException(HttpStatusCode.Unauthorized, message)
 class InternalServerException(message: String = "Internal Server Error") : ApiException(HttpStatusCode.InternalServerError, message)
+class ValidationException(message: String = "Validation Failed") : ApiException(HttpStatusCode.BadRequest, message)

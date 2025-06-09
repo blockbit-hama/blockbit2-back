@@ -47,13 +47,11 @@ dependencies {
     // 코루틴 관련 의존성
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3")
+    
+    // BCrypt 패스워드 해싱
+    implementation("org.mindrot:jbcrypt:0.4")
 
     testImplementation("io.mockk:mockk:1.13.5")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
-
-    // JWT 의존성 추가
-    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }

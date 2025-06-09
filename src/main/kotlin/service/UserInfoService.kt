@@ -1,8 +1,9 @@
 package com.sg.service
 
 import com.sg.dto.*
+import com.sg.exception.ValidationException
 import com.sg.repository.UserInfoRepository
-import java.security.MessageDigest
+import com.sg.utils.PasswordUtil
 
 class UserInfoService(private val repository: UserInfoRepository = UserInfoRepository()) {
     
@@ -23,6 +24,13 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
     
     // 새 사용자 추가
     suspend fun addUser(user: UserInfoDTO): Int {
+        // 패스워드 강도 검증
+        user.usiPwd?.let { password ->
+            if (!PasswordUtil.isValidPassword(password)) {
+                throw ValidationException(PasswordUtil.getPasswordStrengthMessage(password))
+            }
+        }
+        
         // 사용자 생성 시간 설정
         val currentDate = DateTimeUtil.getCurrentDate()
         val currentTime = DateTimeUtil.getCurrentTime()
@@ -56,8 +64,13 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
         val user = repository.getUserForAuthentication(changePasswordDTO.usiEmail) ?: return false
         
         // 현재 비밀번호 확인
-        if (user.usiPwd != hashPassword(changePasswordDTO.currentPassword)) {
+        if (!PasswordUtil.verifyPassword(changePasswordDTO.currentPassword, user.usiPwd ?: "")) {
             return false
+        }
+        
+        // 새 패스워드 강도 검증
+        if (!PasswordUtil.isValidPassword(changePasswordDTO.newPassword)) {
+            throw ValidationException(PasswordUtil.getPasswordStrengthMessage(changePasswordDTO.newPassword))
         }
         
         return repository.updatePassword(user.usiNum!!, changePasswordDTO.newPassword)
@@ -73,7 +86,7 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
         val user = repository.getUserForAuthentication(loginDTO.usiEmail) ?: return null
         
         // 비밀번호 검증
-        if (user.usiPwd != hashPassword(loginDTO.usiPwd)) {
+        if (!PasswordUtil.verifyPassword(loginDTO.usiPwd, user.usiPwd ?: "")) {
             return LoginResponseDTO(
                 usiNum = 0,
                 usiEmail = "",
@@ -110,11 +123,5 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
             usiName = user.usiName,
             token = token
         )
-    }
-    
-    // 비밀번호 해싱 함수
-    private fun hashPassword(password: String): String {
-        val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
     }
 }

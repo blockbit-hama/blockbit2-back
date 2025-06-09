@@ -3,7 +3,7 @@ package com.sg
 import com.sg.config.factory.DatabaseFactory
 import com.sg.config.configureCORS
 import com.sg.config.configureExceptionHandling
-import com.sg.config.configureHTTPSRedirect
+import com.sg.config.configureHTTP
 import com.sg.config.configureRouting
 import com.sg.config.configureSerialization
 import com.sg.plugins.configureJwtAuthentication
@@ -23,5 +23,5 @@ fun Application.module() {
     configureRouting()
     configureSerialization()
     configureCORS()
-    configureHTTPSRedirect()
+    configureHTTP()
 }
