@@ -12,8 +12,8 @@ object WalletsTable : Table("wallets") {
     val walProtocol = varchar("wal_protocol", 20)            // 지갑 프로토콜
     val walStatus = varchar("wal_status", 20)                // 지갑 상태
     val usiNum = integer("usi_num").nullable()               // 사용자 번호 (외래키)
-    val astId = integer("ast_id").nullable()                 // 자산 번호 (외래키)
-    val polId = integer("pol_id").nullable()                 // 정책 번호 (외래키)
+vbb    val astNum = integer("ast_num").nullable()                 // 자산 번호 (외래키)
+    val polNum = integer("pol_num").nullable()                 // 정책 번호 (외래키)
     val creusr = integer("creusr").nullable()                // 생성자
     val credat = char("credat", 8).nullable()                // 생성일자 (YYYYMMDD)
     val cretim = char("cretim", 6).nullable()                // 생성시간 (HHMMSS)
@@ -68,8 +68,8 @@ class WalletsRepository {
                 it[walProtocol] = request.walProtocol
                 it[walStatus] = request.walStatus
                 it[usiNum] = request.usiNum
-                it[astId] = request.astId
-                it[polId] = request.polId
+                it[astNum] = request.astNum
+                it[polNum] = request.polNum
                 it[WalletsTable.creusr] = creusr
                 it[WalletsTable.credat] = credat
                 it[WalletsTable.cretim] = cretim
@@ -97,8 +97,8 @@ class WalletsRepository {
                 it[walProtocol] = requestDTO.walProtocol
                 it[walStatus] = requestDTO.walStatus
                 it[usiNum] = requestDTO.usiNum
-                it[astId] = requestDTO.astId
-                it[polId] = requestDTO.polId
+                it[astNum] = requestDTO.astNum
+                it[polNum] = requestDTO.polNum
                 it[WalletsTable.lmousr] = lmousr
                 it[WalletsTable.lmodat] = lmodat
                 it[WalletsTable.lmotim] = lmotim

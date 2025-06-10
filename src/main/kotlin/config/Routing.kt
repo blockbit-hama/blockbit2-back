@@ -30,12 +30,9 @@ fun Application.configureRouting() {
 
     val bitcoinApiUrl = environment.config.propertyOrNull("bitcoin.api.url")?.getString() ?: "https://api.blockcypher.com/v1/btc/test3"
     val bitcoinApiKey = environment.config.propertyOrNull("bitcoin.api.key")?.getString() ?: ""
-    val bitcoinMultiSigService = BitcoinMultiSigService(bitcoinApiUrl, bitcoinApiKey)
+    val bitcoinMultiSigService = BitcoinMultiSigService(bitcoinApiUrl, bitcoinApiKey, walletsService, walletAddressesService)
 
     routing {
-        get("/") {
-            call.respondText("Hello Ktor!")
-        }
         userInfoRoute(userInfoService)
         commonCodeRoute(commonCodeService)
         bitcoinRoutes(bitcoinMultiSigService)

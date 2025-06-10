@@ -14,8 +14,8 @@ data class WalletsRequestDTO(
     val walProtocol: String,        // 지갑 프로토콜 (MPC, Multisig)
     val walStatus: String,          // 지갑 상태 (frozen, archived, active)
     val usiNum: Int? = null,        // 사용자 번호 (외래키)
-    val astId: Int? = null,         // 자산 번호 (외래키)
-    val polId: Int? = null          // 정책 번호 (외래키)
+    val astNum: Int? = null,         // 자산 번호 (외래키)
+    val polNum: Int? = null          // 정책 번호 (외래키)
 ) : CommonRequestDTO() {
     init {
         require(walName.isNotBlank()) { "Wallet name cannot be blank" }
@@ -46,8 +46,8 @@ data class WalletsResponseDTO(
     val walProtocol: String,        // 지갑 프로토콜
     val walStatus: String,          // 지갑 상태
     val usiNum: Int?,               // 사용자 번호 (외래키)
-    val astId: Int?,                // 자산 번호 (외래키)
-    val polId: Int?,                // 정책 번호 (외래키)
+    val astNum: Int?,                // 자산 번호 (외래키)
+    val polNum: Int?,                // 정책 번호 (외래키)
     
     // 공통 컬럼
     override val creusr: Int?,           // 생성자
@@ -67,8 +67,8 @@ data class WalletsResponseDTO(
                 walProtocol = row[WalletsTable.walProtocol],
                 walStatus = row[WalletsTable.walStatus],
                 usiNum = row[WalletsTable.usiNum],
-                astId = row[WalletsTable.astId],
-                polId = row[WalletsTable.polId],
+                astNum = row[WalletsTable.astNum],
+                polNum = row[WalletsTable.polNum],
                 creusr = row[WalletsTable.creusr],
                 credat = row[WalletsTable.credat],
                 cretim = row[WalletsTable.cretim],

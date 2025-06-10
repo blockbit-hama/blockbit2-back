@@ -3,6 +3,11 @@ package com.sg.service.wallet
 import com.sg.dto.wallet.MultisigWalletDTO
 import com.sg.dto.wallet.PartiallySignedTransactionDTO
 import com.sg.utils.wallet.bitcoin.BlockCypherClient
+import com.sg.service.WalletsService
+import com.sg.service.WalletAddressesService
+import com.sg.dto.WalletsRequestDTO
+import com.sg.dto.WalletAddressesRequestDTO
+import kotlinx.coroutines.runBlocking
 import org.bitcoinj.core.*
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.script.Script
@@ -11,7 +16,9 @@ import org.slf4j.LoggerFactory
 
 class BitcoinMultiSigService(
     private val apiBaseUrl: String = "https://api.blockcypher.com/v1/btc/test3",
-    private val apiKey: String = ""
+    private val apiKey: String = "",
+    private val walletsService: WalletsService? = null,
+    private val walletAddressesService: WalletAddressesService? = null
 ) {
 
     private val logger = LoggerFactory.getLogger(BitcoinMultiSigService::class.java)
@@ -21,7 +28,10 @@ class BitcoinMultiSigService(
     /**
      * 2-of-3 멀티시그 지갑 생성
      */
-    fun createMultisigWallet(): MultisigWalletDTO {
+    fun createMultisigWallet(
+        walletRequest: WalletsRequestDTO,
+        userId: Int
+    ): MultisigWalletDTO {
         try {
             // 3개의 키 쌍 생성
             val keys = ArrayList<ECKey>()
@@ -41,12 +51,60 @@ class BitcoinMultiSigService(
             // P2SH 주소 생성
             val multiSigAddress = ScriptBuilder.createP2SHOutputScript(redeemScript).getToAddress(params)
 
+            // ========== DB 저장 로직 ==========
+            if (walletsService != null && walletAddressesService != null) {
+                try {
+                    // 1. 지갑 정보 저장 (요청받은 그대로)
+                    val walletId = runBlocking {
+                        walletsService.insertWAL(walletRequest, userId)
+                    }
+                    
+                    // 2. JSON 데이터 생성
+                    val keyInfoMap = mapOf(
+                        "type" to "multisig",
+                        "publicKeys" to publicKeys,
+                        "privateKeys" to privateKeys,
+                        "requiredSigs" to 2,
+                        "totalKeys" to 3
+                    )
+                    
+                    val scriptInfoMap = mapOf(
+                        "redeemScript" to Utils.HEX.encode(redeemScript.program),
+                        "scriptType" to "P2SH",
+                        "network" to "testnet"
+                    )
+                    
+                    val gson = com.google.gson.Gson()
+                    val keyInfoJson = gson.toJson(keyInfoMap)
+                    val scriptInfoJson = gson.toJson(scriptInfoMap)
+                    
+                    // 3. 주소 정보 저장
+                    val addressRequest = WalletAddressesRequestDTO(
+                        walNum = walletId,
+                        wadAddress = multiSigAddress.toString(),
+                        wadKeyInfo = keyInfoJson,
+                        wadScriptInfo = scriptInfoJson
+                    )
+                    
+                    val addressId = runBlocking {
+                        walletAddressesService.insertWAD(addressRequest, userId)
+                    }
+                    
+                    logger.info("Bitcoin wallet saved to DB - User: $userId, WalletId: $walletId, AddressId: $addressId, Name: '${walletRequest.walName}', Type: '${walletRequest.walType}', Address: ${multiSigAddress}")
+                    
+                } catch (dbException: Exception) {
+                    logger.warn("Failed to save wallet to DB (wallet creation still successful): ${dbException.message}")
+                }
+            } else {
+                logger.debug("DB services not available - wallet creation only")
+            }
+
             // 결과 반환
             return MultisigWalletDTO().apply {
                 address = multiSigAddress.toString()
                 this.redeemScript = Utils.HEX.encode(redeemScript.program)
                 this.publicKeys = publicKeys
-                this.privateKeys = privateKeys // 실제로는 서버에 저장하지 말고 안전하게 분배
+                this.privateKeys = privateKeys
             }
         } catch (e: Exception) {
             logger.error("멀티시그 지갑 생성 오류", e)
