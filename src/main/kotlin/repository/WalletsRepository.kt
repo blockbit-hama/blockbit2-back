@@ -12,7 +12,7 @@ object WalletsTable : Table("wallets") {
     val walProtocol = varchar("wal_protocol", 20)            // 지갑 프로토콜
     val walStatus = varchar("wal_status", 20)                // 지갑 상태
     val usiNum = integer("usi_num").nullable()               // 사용자 번호 (외래키)
-vbb    val astNum = integer("ast_num").nullable()                 // 자산 번호 (외래키)
+    val astNum = integer("ast_num").nullable()                 // 자산 번호 (외래키)
     val polNum = integer("pol_num").nullable()                 // 정책 번호 (외래키)
     val creusr = integer("creusr").nullable()                // 생성자
     val credat = char("credat", 8).nullable()                // 생성일자 (YYYYMMDD)
