@@ -7,7 +7,6 @@ import com.sg.service.WalletsService
 import com.sg.service.WalletAddressesService
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletAddressesRequestDTO
-import kotlinx.coroutines.runBlocking
 import org.bitcoinj.core.*
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.script.Script
@@ -17,8 +16,8 @@ import org.slf4j.LoggerFactory
 class BitcoinMultiSigService(
     private val apiBaseUrl: String = "https://api.blockcypher.com/v1/btc/test3",
     private val apiKey: String = "",
-    private val walletsService: WalletsService? = null,
-    private val walletAddressesService: WalletAddressesService? = null
+    private val walletsService: WalletsService,
+    private val walletAddressesService: WalletAddressesService
 ) {
 
     private val logger = LoggerFactory.getLogger(BitcoinMultiSigService::class.java)
@@ -26,9 +25,37 @@ class BitcoinMultiSigService(
     private val blockCypherClient = BlockCypherClient(apiBaseUrl, apiKey)
     
     /**
+     * Private Key 정규화 유틸리티 함수
+     */
+    private fun normalizePrivateKey(privateKeyHex: String): ECKey {
+        return try {
+            logger.debug("개인키 길이: ${privateKeyHex.length}")
+            
+            // 16진수 문자열에서 공백과 0x 접두사 제거
+            val cleanedPrivateKeyHex = privateKeyHex.trim().replace("0x", "")
+            
+            val finalKeyHex = if (cleanedPrivateKeyHex.length % 2 != 0) {
+                // 길이가 짝수가 아니면 앞에 0 추가
+                "0$cleanedPrivateKeyHex"
+            } else {
+                cleanedPrivateKeyHex
+            }
+            
+            // 처리된 16진수 문자열로 개인키 생성
+            val keyBytes = Utils.HEX.decode(finalKeyHex)
+            logger.debug("키 바이트 길이: ${keyBytes.size}")
+            
+            ECKey.fromPrivate(keyBytes)
+        } catch (e: Exception) {
+            logger.error("개인키 파싱 오류: ${e.message}", e)
+            throw IllegalArgumentException("잘못된 개인키 형식입니다: ${e.message}")
+        }
+    }
+    
+    /**
      * 2-of-3 멀티시그 지갑 생성
      */
-    fun createMultisigWallet(
+    suspend fun createMultisigWallet(
         walletRequest: WalletsRequestDTO,
         userId: Int
     ): MultisigWalletDTO {
@@ -52,51 +79,46 @@ class BitcoinMultiSigService(
             val multiSigAddress = ScriptBuilder.createP2SHOutputScript(redeemScript).getToAddress(params)
 
             // ========== DB 저장 로직 ==========
-            if (walletsService != null && walletAddressesService != null) {
-                try {
-                    // 1. 지갑 정보 저장 (요청받은 그대로)
-                    val walletId = runBlocking {
-                        walletsService.insertWAL(walletRequest, userId)
-                    }
-                    
-                    // 2. JSON 데이터 생성
-                    val keyInfoMap = mapOf(
-                        "type" to "multisig",
-                        "publicKeys" to publicKeys,
-                        "privateKeys" to privateKeys,
-                        "requiredSigs" to 2,
-                        "totalKeys" to 3
-                    )
-                    
-                    val scriptInfoMap = mapOf(
-                        "redeemScript" to Utils.HEX.encode(redeemScript.program),
-                        "scriptType" to "P2SH",
-                        "network" to "testnet"
-                    )
-                    
-                    val gson = com.google.gson.Gson()
-                    val keyInfoJson = gson.toJson(keyInfoMap)
-                    val scriptInfoJson = gson.toJson(scriptInfoMap)
-                    
-                    // 3. 주소 정보 저장
-                    val addressRequest = WalletAddressesRequestDTO(
-                        walNum = walletId,
-                        wadAddress = multiSigAddress.toString(),
-                        wadKeyInfo = keyInfoJson,
-                        wadScriptInfo = scriptInfoJson
-                    )
-                    
-                    val addressId = runBlocking {
-                        walletAddressesService.insertWAD(addressRequest, userId)
-                    }
-                    
-                    logger.info("Bitcoin wallet saved to DB - User: $userId, WalletId: $walletId, AddressId: $addressId, Name: '${walletRequest.walName}', Type: '${walletRequest.walType}', Address: ${multiSigAddress}")
-                    
-                } catch (dbException: Exception) {
-                    logger.warn("Failed to save wallet to DB (wallet creation still successful): ${dbException.message}")
-                }
-            } else {
-                logger.debug("DB services not available - wallet creation only")
+            try {
+                // 1. 지갑 정보 저장 (요청받은 그대로)
+                val walletId = walletsService.insertWAL(walletRequest, userId)
+                
+                // 2. JSON 데이터 생성
+                val keyInfoMap = mapOf(
+                    "type" to "multisig",
+                    "publicKeys" to publicKeys,
+                    "privateKeys" to privateKeys,
+                    "requiredSigs" to 2,
+                    "totalKeys" to 3
+                )
+                
+                val scriptInfoMap = mapOf(
+                    "redeemScript" to Utils.HEX.encode(redeemScript.program),
+                    "scriptType" to "P2SH",
+                    "network" to "testnet"
+                )
+                
+                val gson = com.google.gson.Gson()
+                val keyInfoJson = gson.toJson(keyInfoMap)
+                val scriptInfoJson = gson.toJson(scriptInfoMap)
+                
+                // 3. 주소 정보 저장
+                val addressRequest = WalletAddressesRequestDTO(
+                    walNum = walletId,
+                    wadAddress = multiSigAddress.toString(),
+                    wadKeyInfo = keyInfoJson,
+                    wadScriptInfo = scriptInfoJson
+                )
+
+                throw RuntimeException("test@@")
+
+                val addressId = walletAddressesService.insertWAD(addressRequest, userId)
+                
+                logger.info("Bitcoin wallet saved to DB - User: $userId, WalletId: $walletId, AddressId: $addressId, Name: '${walletRequest.walName}', Type: '${walletRequest.walType}', Address: ${multiSigAddress}")
+                
+            } catch (dbException: Exception) {
+                logger.error("Failed to save wallet to DB: ${dbException.message}", dbException)
+                throw RuntimeException("Failed to save wallet to database", dbException)
             }
 
             // 결과 반환
@@ -115,7 +137,7 @@ class BitcoinMultiSigService(
     /**
      * 멀티시그 트랜잭션 생성 (서명 1개 포함)
      */
-    fun createMultisigTransaction(
+    suspend fun createMultisigTransaction(
         fromAddress: String,
         toAddress: String,
         amountSatoshi: Long,
@@ -131,29 +153,8 @@ class BitcoinMultiSigService(
                 throw IllegalArgumentException("개인키가 비어 있습니다.")
             }
             
-            // 개인키 로드: 16진수 문자열이 잘못되었을 수 있음
-            val privateKey = try {
-                logger.debug("개인키 길이: ${privateKeyHex.length}")
-                
-                // 16진수 문자열에서 공백과 0x 접두사 제거
-                val cleanedPrivateKeyHex = privateKeyHex.trim().replace("0x", "")
-                
-                if (cleanedPrivateKeyHex.length % 2 != 0) {
-                    // 길이가 짝수가 아니면 앞에 0 추가
-                    "0$cleanedPrivateKeyHex"
-                } else {
-                    cleanedPrivateKeyHex
-                }
-                
-                // 처리된 16진수 문자열로 개인키 생성
-                val keyBytes = Utils.HEX.decode(cleanedPrivateKeyHex)
-                logger.debug("키 바이트 길이: ${keyBytes.size}")
-                
-                ECKey.fromPrivate(keyBytes)
-            } catch (e: Exception) {
-                logger.error("개인키 파싱 오류: ${e.message}", e)
-                throw IllegalArgumentException("잘못된 개인키 형식입니다: ${e.message}")
-            }
+            // 개인키 로드
+            val privateKey = normalizePrivateKey(privateKeyHex)
             
             // 리딤 스크립트 파싱
             val redeemScript = try {
@@ -222,29 +223,14 @@ class BitcoinMultiSigService(
     /**
      * 멀티시그 트랜잭션 서명 추가 (두 번째 서명)
      */
-    fun addSignatureToTransaction(
+    suspend fun addSignatureToTransaction(
         partialTx: PartiallySignedTransactionDTO,
         privateKeyHex: String
     ): String {
 
         try {
-            // 개인키 로드 - 첫 번째 메소드와 동일한 방식으로 처리
-            val privateKey = try {
-                // 16진수 문자열에서 공백과 0x 접두사 제거
-                val cleanedPrivateKeyHex = privateKeyHex.trim().replace("0x", "")
-                
-                val finalKeyHex = if (cleanedPrivateKeyHex.length % 2 != 0) {
-                    // 길이가 짝수가 아니면 앞에 0 추가
-                    "0$cleanedPrivateKeyHex"
-                } else {
-                    cleanedPrivateKeyHex
-                }
-                
-                ECKey.fromPrivate(Utils.HEX.decode(finalKeyHex))
-            } catch (e: Exception) {
-                logger.error("개인키 파싱 오류: ${e.message}", e)
-                throw IllegalArgumentException("잘못된 개인키 형식입니다: ${e.message}")
-            }
+            // 개인키 로드
+            val privateKey = normalizePrivateKey(privateKeyHex)
             
             // 트랜잭션 복원
             val txBytes = Utils.HEX.decode(partialTx.transactionHex)
@@ -302,7 +288,7 @@ class BitcoinMultiSigService(
      * @param address 조회할 비트코인 주소
      * @return UTXO 목록 및 총 잔액 정보를 담은 DTO
      */
-    fun getAddressUTXOs(address: String): com.sg.dto.wallet.UTXOResponseDTO {
+    suspend fun getAddressUTXOs(address: String): com.sg.dto.wallet.UTXOResponseDTO {
         try {
             logger.info("UTXO 조회 시작: 주소=${address}")
             

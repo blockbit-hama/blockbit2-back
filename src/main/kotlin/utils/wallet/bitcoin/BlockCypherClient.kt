@@ -7,7 +7,6 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.bitcoinj.core.*
 import org.slf4j.LoggerFactory
@@ -36,7 +35,7 @@ class BlockCypherClient(
      * @param address 조회할 주소
      * @return UTXO 목록 (트랜잭션 ID, 출력 인덱스, 금액)
      */
-    fun getUTXOs(address: String): List<UTXOInfo> = runBlocking {
+    suspend fun getUTXOs(address: String): List<UTXOInfo> {
         try {
             // BlockCypher API 호출
             val apiUrl = "$apiBaseUrl/addrs/$address?unspentOnly=true&includeScript=true"
@@ -48,7 +47,7 @@ class BlockCypherClient(
             
             // JSON 파싱
             val utxos = mutableListOf<UTXOInfo>()
-            val txRefs = jsonObject.getAsJsonArray("txrefs") ?: return@runBlocking emptyList()
+            val txRefs = jsonObject.getAsJsonArray("txrefs") ?: return emptyList()
             
             for (i in 0 until txRefs.size()) {
                 val txRef = txRefs.get(i).asJsonObject
@@ -65,10 +64,10 @@ class BlockCypherClient(
                 ))
             }
             
-            return@runBlocking utxos
+            return utxos
         } catch (e: Exception) {
             logger.error("UTXO 조회 실패", e)
-            return@runBlocking emptyList()
+            return emptyList()
         }
     }
 
@@ -77,7 +76,7 @@ class BlockCypherClient(
      * @param txHex 트랜잭션 16진수 문자열
      * @return 트랜잭션 해시 (성공 시) 또는 null (실패 시)
      */
-    fun broadcastTransaction(txHex: String): String? = runBlocking {
+    suspend fun broadcastTransaction(txHex: String): String? {
         try {
             // BlockCypher API 호출
             val apiUrl = "$apiBaseUrl/txs/push"
@@ -92,10 +91,10 @@ class BlockCypherClient(
             
             // JSON 파싱
             val jsonObject = JsonParser.parseString(responseText).asJsonObject
-            return@runBlocking jsonObject.get("tx").asJsonObject.get("hash").asString
+            return jsonObject.get("tx").asJsonObject.get("hash").asString
         } catch (e: Exception) {
             logger.error("트랜잭션 브로드캐스트 실패", e)
-            return@runBlocking null
+            return null
         }
     }
 
@@ -103,7 +102,7 @@ class BlockCypherClient(
      * 트랜잭션 수수료 추천 값을 조회합니다.
      * @return 추천 수수료 (satoshi/byte)
      */
-    fun getRecommendedFee(): Int = runBlocking {
+    suspend fun getRecommendedFee(): Int {
         try {
             // BlockCypher API 호출
             val apiUrl = "$apiBaseUrl"
@@ -114,10 +113,10 @@ class BlockCypherClient(
             val jsonObject = JsonParser.parseString(responseText).asJsonObject
             
             // 일반 우선순위 수수료 반환 (중간값)
-            return@runBlocking jsonObject.get("medium_fee_per_kb").asInt / 1000
+            return jsonObject.get("medium_fee_per_kb").asInt / 1000
         } catch (e: Exception) {
             logger.error("수수료 조회 실패", e)
-            return@runBlocking 10 // 기본값 10 satoshi/byte
+            return 10 // 기본값 10 satoshi/byte
         }
     }
     
