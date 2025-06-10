@@ -7,7 +7,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.walletRoutes(
+fun Route.bitcoinRoutes(
     bitcoinMultiSigService: BitcoinMultiSigService
 ) {
     route("/api/wallet") {

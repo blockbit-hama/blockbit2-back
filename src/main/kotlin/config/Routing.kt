@@ -35,7 +35,7 @@ fun Application.configureRouting() {
         }
         userInfoRoute(userInfoService)
         commonCodeRoute(commonCodeService)
-        walletRoutes(bitcoinMultiSigService)
+        bitcoinRoutes(bitcoinMultiSigService)
         assetsRoute(assetsService)
         policiesRoute(policiesService)
         walletsRoute(walletsService)
