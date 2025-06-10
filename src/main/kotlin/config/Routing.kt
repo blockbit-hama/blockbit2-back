@@ -25,6 +25,9 @@ fun Application.configureRouting() {
     val walletsRepository = WalletsRepository();
     val walletsService = WalletsService(walletsRepository)
 
+    val walletAddressesRepository = WalletAddressesRepository();
+    val walletAddressesService = WalletAddressesService(walletAddressesRepository)
+
     val bitcoinApiUrl = environment.config.propertyOrNull("bitcoin.api.url")?.getString() ?: "https://api.blockcypher.com/v1/btc/test3"
     val bitcoinApiKey = environment.config.propertyOrNull("bitcoin.api.key")?.getString() ?: ""
     val bitcoinMultiSigService = BitcoinMultiSigService(bitcoinApiUrl, bitcoinApiKey)
@@ -39,5 +42,6 @@ fun Application.configureRouting() {
         assetsRoute(assetsService)
         policiesRoute(policiesService)
         walletsRoute(walletsService)
+        walletAddressesRoute(walletAddressesService)
     }
 }
