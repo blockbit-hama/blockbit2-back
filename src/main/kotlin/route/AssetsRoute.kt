@@ -1,11 +1,11 @@
 package com.sg.route
 
-import com.sg.dto.CommonCodeRequestDTO
+import com.sg.dto.AssetsRequestDTO
 import com.sg.dto.common.SimpleSuccessResponse
 import com.sg.dto.common.SuccessResponse
 import com.sg.exception.BadRequestException
 import com.sg.exception.NotFoundException
-import com.sg.service.CommonCodeService
+import com.sg.service.AssetsService
 import com.sg.utils.JwtUtil
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -14,24 +14,24 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
+fun Route.assetsRoute(assetsService: AssetsService) {
     authenticate("jwt-auth") {
-        route("/api/cod") {
+        route("/api/ast") {
             
             get("/list") {
                 val offset = call.request.queryParameters["offset"]?.toIntOrNull()
                 val limit = call.request.queryParameters["limit"]?.toIntOrNull()
 
-                val result = commonCodeService.selectCODList(offset, limit)
+                val result = assetsService.selectASTList(offset, limit)
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
             
-            get("/{codNum}") {
-                val codNum = call.parameters["codNum"]?.toIntOrNull()
-                    ?: throw BadRequestException("Valid cod_num is required")
+            get("/{astNum}") {
+                val astNum = call.parameters["astNum"]?.toIntOrNull()
+                    ?: throw BadRequestException("Valid ast_num is required")
 
-                val result = commonCodeService.selectCOD(codNum)
-                    ?: throw NotFoundException("Common code not found")
+                val result = assetsService.selectAST(astNum)
+                    ?: throw NotFoundException("Asset not found")
 
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
@@ -41,14 +41,14 @@ fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
 
-                val request = call.receive<CommonCodeRequestDTO>()
-                val codNum = commonCodeService.insertCOD(request, userId)
+                val request = call.receive<AssetsRequestDTO>()
+                val astNum = assetsService.insertAST(request, userId)
 
                 call.respond(
                     HttpStatusCode.Created,
                     SuccessResponse(
-                        data = mapOf("codNum" to codNum),
-                        message = "Common code created successfully"
+                        data = mapOf("astNum" to astNum),
+                        message = "Asset created successfully"
                     )
                 )
             }
@@ -58,31 +58,31 @@ fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
 
-                val request = call.receive<CommonCodeRequestDTO>()
-                val result = commonCodeService.updateCOD(request, userId)
+                val request = call.receive<AssetsRequestDTO>()
+                val result = assetsService.updateAST(request, userId)
 
-                if (!result) throw NotFoundException("Common code not found")
+                if (!result) throw NotFoundException("Asset not found")
                 
                 call.respond(
                     HttpStatusCode.OK,
-                    SimpleSuccessResponse(message = "Common code updated successfully")
+                    SimpleSuccessResponse(message = "Asset updated successfully")
                 )
             }
             
-            delete("/{codNum}") {
-                val codNum = call.parameters["codNum"]?.toIntOrNull()
-                    ?: throw BadRequestException("Valid cod_num is required")
+            delete("/{astNum}") {
+                val astNum = call.parameters["astNum"]?.toIntOrNull()
+                    ?: throw BadRequestException("Valid ast_num is required")
                 
                 val principal = call.principal<JWTPrincipal>()
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
                 
-                val result = commonCodeService.deleteCOD(codNum, userId)
-                if (!result) throw NotFoundException("Common code not found")
+                val result = assetsService.deleteAST(astNum, userId)
+                if (!result) throw NotFoundException("Asset not found")
                 
                 call.respond(
                     HttpStatusCode.OK,
-                    SimpleSuccessResponse(message = "Common code deleted successfully")
+                    SimpleSuccessResponse(message = "Asset deleted successfully")
                 )
             }
         }

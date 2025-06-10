@@ -2,11 +2,9 @@ package com.sg.config
 
 import com.sg.route.*
 import com.sg.route.wallet.*
-import com.sg.repository.UserInfoRepository
-import com.sg.repository.CommonCodeRepository
-import com.sg.service.UserInfoService
-import com.sg.service.CommonCodeService
-import com.sg.service.wallet.BitcoinMultiSigService
+import com.sg.repository.*
+import com.sg.service.*
+import com.sg.service.wallet.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -17,6 +15,15 @@ fun Application.configureRouting() {
     
     val commonCodeRepository = CommonCodeRepository()
     val commonCodeService = CommonCodeService(commonCodeRepository)
+
+    val assetsRepository = AssetsRepository();
+    val assetsService = AssetsService(assetsRepository)
+
+    val policiesRepository = PoliciesRepository();
+    val policiesService = PoliciesService(policiesRepository)
+
+    val walletsRepository = WalletsRepository();
+    val walletsService = WalletsService(walletsRepository)
 
     val bitcoinApiUrl = environment.config.propertyOrNull("bitcoin.api.url")?.getString() ?: "https://api.blockcypher.com/v1/btc/test3"
     val bitcoinApiKey = environment.config.propertyOrNull("bitcoin.api.key")?.getString() ?: ""
@@ -29,6 +36,8 @@ fun Application.configureRouting() {
         userInfoRoute(userInfoService)
         commonCodeRoute(commonCodeService)
         walletRoutes(bitcoinMultiSigService)
-
+        assetsRoute(assetsService)
+        policiesRoute(policiesService)
+        walletsRoute(walletsService)
     }
 }

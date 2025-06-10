@@ -24,14 +24,19 @@ object CommonCodeTable : Table("common_code") {
 
 class CommonCodeRepository {
 
-    suspend fun selectCODList(offset: Int, limit: Int): List<CommonCodeResponseDTO> {
+    suspend fun selectCODList(offset: Int?, limit: Int?): List<CommonCodeResponseDTO> {
         return newSuspendedTransaction {
-            val query = CommonCodeTable
+            CommonCodeTable
                 .select { CommonCodeTable.active eq "1" }
                 .orderBy(CommonCodeTable.codNum to SortOrder.DESC)
-                .limit(limit, offset.toLong())
-
-            query.map { CommonCodeResponseDTO.fromResultRow(it) }
+                .let { query ->
+                    if (offset != null && limit != null) {
+                        query.limit(limit, offset.toLong())
+                    } else {
+                        query
+                    }
+                }
+                .map { CommonCodeResponseDTO.fromResultRow(it) }
         }
     }
 

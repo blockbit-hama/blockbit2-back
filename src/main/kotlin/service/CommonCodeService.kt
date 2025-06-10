@@ -10,7 +10,7 @@ class CommonCodeService(
     private val commonCodeRepository: CommonCodeRepository
 ) {
     
-    suspend fun selectCODList(offset: Int, limit: Int): List<CommonCodeResponseDTO> {
+    suspend fun selectCODList(offset: Int?, limit: Int?): List<CommonCodeResponseDTO> {
         return commonCodeRepository.selectCODList(offset, limit)
     }
     
