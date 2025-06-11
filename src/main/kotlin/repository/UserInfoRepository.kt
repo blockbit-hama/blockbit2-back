@@ -1,6 +1,5 @@
 package com.sg.repository
 
-import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.UserInfoDTO
 import com.sg.dto.UserInfoResponseDTO
 import com.sg.utils.PasswordUtil
@@ -30,41 +29,41 @@ object UserInfoTable : Table("user_info") {
 
 class UserInfoRepository {
     // 모든 유저 조회
-    suspend fun getAllUsers(): List<UserInfoResponseDTO> = dbQuery {
-        UserInfoTable.selectAll()
+    fun getAllUsers(): List<UserInfoResponseDTO> {
+        return UserInfoTable.selectAll()
             .map { resultRowToUserResponseDTO(it) }
     }
 
     // 유저 ID로 유저 정보 조회
-    suspend fun getUserById(id: String): UserInfoResponseDTO? = dbQuery {
-        UserInfoTable
+    fun getUserById(id: String): UserInfoResponseDTO? {
+        return UserInfoTable
             .select { UserInfoTable.usiId eq id }
             .map { resultRowToUserResponseDTO(it) }
             .singleOrNull()
     }
 
     // 유저 번호로 유저 정보 조회
-    suspend fun getUserByNum(num: Int): UserInfoResponseDTO? = dbQuery {
-        UserInfoTable
+    fun getUserByNum(num: Int): UserInfoResponseDTO? {
+        return UserInfoTable
             .select { UserInfoTable.usiNum eq num }
             .map { resultRowToUserResponseDTO(it) }
             .singleOrNull()
     }
 
     // 비밀번호 체크를 위한 유저 조회 (비밀번호 포함)
-    suspend fun getUserForAuthentication(email: String): UserInfoDTO? = dbQuery {
-        UserInfoTable
+    fun getUserForAuthentication(email: String): UserInfoDTO? {
+        return UserInfoTable
             .select { UserInfoTable.usiEmail eq email }
             .map { resultRowToUserDTO(it) }
             .singleOrNull()
     }
 
     // 유저 생성
-    suspend fun addUser(userInfo: UserInfoDTO): Int = dbQuery {
+    fun addUser(userInfo: UserInfoDTO): Int {
         // 비밀번호 해시
         val hashedPassword = PasswordUtil.hashPassword(userInfo.usiPwd ?: "")
         
-        UserInfoTable.insert {
+        return UserInfoTable.insert {
             it[usiId] = userInfo.usiId
             it[usiPwd] = hashedPassword
             it[usiName] = userInfo.usiName
@@ -85,8 +84,8 @@ class UserInfoRepository {
     }
 
     // 유저 정보 업데이트
-    suspend fun updateUser(userInfo: UserInfoDTO): Boolean = dbQuery {
-        if (userInfo.usiNum == null) return@dbQuery false
+    fun updateUser(userInfo: UserInfoDTO): Boolean {
+        if (userInfo.usiNum == null) return false
         
         val updateResult = UserInfoTable.update({ UserInfoTable.usiNum eq userInfo.usiNum }) {
             userInfo.usiName?.let { name -> it[usiName] = name }
@@ -101,28 +100,28 @@ class UserInfoRepository {
             userInfo.lmotim?.let { modTim -> it[lmotim] = modTim }
             it[active] = userInfo.active
         }
-        updateResult > 0
+        return updateResult > 0
     }
 
     // 비밀번호 업데이트
-    suspend fun updatePassword(usiNum: Int, newPassword: String): Boolean = dbQuery {
+    fun updatePassword(usiNum: Int, newPassword: String): Boolean {
         val hashedPassword = PasswordUtil.hashPassword(newPassword)
         val updateResult = UserInfoTable.update({ UserInfoTable.usiNum eq usiNum }) {
             it[usiPwd] = hashedPassword
         }
-        updateResult > 0
+        return updateResult > 0
     }
 
     // 유저 삭제 (실제 삭제가 아닌 active 상태 변경)
-    suspend fun deleteUser(usiNum: Int): Boolean = dbQuery {
+    fun deleteUser(usiNum: Int): Boolean {
         val updateResult = UserInfoTable.update({ UserInfoTable.usiNum eq usiNum }) {
             it[active] = "0"
         }
-        updateResult > 0
+        return updateResult > 0
     }
 
     // 유저 로그인 시간 업데이트
-    suspend fun updateLoginTime(usiNum: Int, loginDat: String, loginTim: String): Boolean = dbQuery {
+    fun updateLoginTime(usiNum: Int, loginDat: String, loginTim: String): Boolean {
         val lastLoginDat = UserInfoTable.select { UserInfoTable.usiNum eq usiNum }
             .map { it[UserInfoTable.usiLoginDat] }.singleOrNull()
         val lastLoginTim = UserInfoTable.select { UserInfoTable.usiNum eq usiNum }
@@ -134,7 +133,7 @@ class UserInfoRepository {
             if (lastLoginDat != null) it[usiLastLoginDat] = lastLoginDat
             if (lastLoginTim != null) it[usiLastLoginTim] = lastLoginTim
         }
-        updateResult > 0
+        return updateResult > 0
     }
 
     // ResultRow를 DTO로 변환하는 함수

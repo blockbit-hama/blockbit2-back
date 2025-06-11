@@ -1,5 +1,6 @@
 package com.sg.route
 
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.*
 import com.sg.dto.common.SimpleSuccessResponse
 import com.sg.dto.common.SuccessResponse
@@ -65,7 +66,9 @@ fun Route.userInfoRoute(userInfoService: UserInfoService) {
         // 사용자 비밀번호 변경
         put("/change-password") {
             val passwordDTO = call.receive<ChangePasswordDTO>()
-            val result = userInfoService.changePassword(passwordDTO)
+            val result = dbQuery {
+                userInfoService.changePassword(passwordDTO)
+            }
             
             if (!result) {
                 throw BadRequestException("Failed to change password. Check your current password")
@@ -78,7 +81,9 @@ fun Route.userInfoRoute(userInfoService: UserInfoService) {
             val usiNum = call.parameters["usiNum"]?.toIntOrNull() 
                 ?: throw BadRequestException("Valid user number is required")
             
-            val result = userInfoService.deleteUser(usiNum)
+            val result = dbQuery {
+                userInfoService.deleteUser(usiNum)
+            }
             if (!result) throw NotFoundException("User not found")
             
             call.respond(HttpStatusCode.OK, SimpleSuccessResponse(message = "User deleted successfully"))
@@ -87,7 +92,9 @@ fun Route.userInfoRoute(userInfoService: UserInfoService) {
         // 로그인
         post("/login") {
             val loginDTO = call.receive<LoginDTO>()
-            val response = userInfoService.login(loginDTO)
+            val response = dbQuery {
+                userInfoService.login(loginDTO)
+            }
             
             if (response == null || !response.success) {
                 throw UnauthorizedException("Login failed")

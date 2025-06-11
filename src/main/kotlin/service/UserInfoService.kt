@@ -8,22 +8,22 @@ import com.sg.utils.PasswordUtil
 class UserInfoService(private val repository: UserInfoRepository = UserInfoRepository()) {
     
     // 모든 사용자 목록 조회
-    suspend fun getAllUsers(): List<UserInfoResponseDTO> {
+    fun getAllUsers(): List<UserInfoResponseDTO> {
         return repository.getAllUsers()
     }
     
     // 사용자 ID로 사용자 정보 조회
-    suspend fun getUserById(id: String): UserInfoResponseDTO? {
+    fun getUserById(id: String): UserInfoResponseDTO? {
         return repository.getUserById(id)
     }
     
     // 사용자 번호로 사용자 정보 조회
-    suspend fun getUserByNum(num: Int): UserInfoResponseDTO? {
+    fun getUserByNum(num: Int): UserInfoResponseDTO? {
         return repository.getUserByNum(num)
     }
     
     // 새 사용자 추가
-    suspend fun addUser(user: UserInfoDTO): Int {
+    fun addUser(user: UserInfoDTO): Int {
         // 패스워드 강도 검증
         user.usiPwd?.let { password ->
             if (!PasswordUtil.isValidPassword(password)) {
@@ -46,7 +46,7 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
     }
     
     // 사용자 정보 업데이트
-    suspend fun updateUser(user: UserInfoDTO): Boolean {
+    fun updateUser(user: UserInfoDTO): Boolean {
         // 업데이트 시간 설정
         val currentDate = DateTimeUtil.getCurrentDate()
         val currentTime = DateTimeUtil.getCurrentTime()
@@ -60,7 +60,7 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
     }
     
     // 사용자 비밀번호 변경
-    suspend fun changePassword(changePasswordDTO: ChangePasswordDTO): Boolean {
+    fun changePassword(changePasswordDTO: ChangePasswordDTO): Boolean {
         val user = repository.getUserForAuthentication(changePasswordDTO.usiEmail) ?: return false
         
         // 현재 비밀번호 확인
@@ -77,12 +77,12 @@ class UserInfoService(private val repository: UserInfoRepository = UserInfoRepos
     }
     
     // 사용자 삭제 (비활성화)
-    suspend fun deleteUser(usiNum: Int): Boolean {
+    fun deleteUser(usiNum: Int): Boolean {
         return repository.deleteUser(usiNum)
     }
     
     // 로그인 처리
-    suspend fun login(loginDTO: LoginDTO): LoginResponseDTO? {
+    fun login(loginDTO: LoginDTO): LoginResponseDTO? {
         val user = repository.getUserForAuthentication(loginDTO.usiEmail) ?: return null
         
         // 비밀번호 검증
