@@ -1,5 +1,6 @@
 package com.sg.service.wallet
 
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.wallet.MultisigWalletDTO
 import com.sg.dto.wallet.PartiallySignedTransactionDTO
 import com.sg.utils.wallet.bitcoin.BlockCypherClient
@@ -58,7 +59,7 @@ class BitcoinMultiSigService(
     suspend fun createMultisigWallet(
         walletRequest: WalletsRequestDTO,
         userId: Int
-    ): MultisigWalletDTO {
+    ): MultisigWalletDTO = dbQuery {
         try {
             // 3개의 키 쌍 생성
             val keys = ArrayList<ECKey>()
@@ -80,7 +81,7 @@ class BitcoinMultiSigService(
 
             // ========== DB 저장 로직 ==========
             try {
-                // 1. 지갑 정보 저장 (요청받은 그대로)
+                // 1. 지갑 정보 저장
                 val walletId = walletsService.insertWAL(walletRequest, userId)
                 
                 // 2. JSON 데이터 생성
@@ -110,6 +111,7 @@ class BitcoinMultiSigService(
                     wadScriptInfo = scriptInfoJson
                 )
 
+                // 테스트용 예외 발생 (이제 전체가 롤백됨)
                 throw RuntimeException("test@@")
 
                 val addressId = walletAddressesService.insertWAD(addressRequest, userId)
@@ -121,8 +123,7 @@ class BitcoinMultiSigService(
                 throw RuntimeException("Failed to save wallet to database", dbException)
             }
 
-            // 결과 반환
-            return MultisigWalletDTO().apply {
+            MultisigWalletDTO().apply {
                 address = multiSigAddress.toString()
                 this.redeemScript = Utils.HEX.encode(redeemScript.program)
                 this.publicKeys = publicKeys

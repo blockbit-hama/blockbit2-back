@@ -79,22 +79,20 @@ class WalletAddressesRepository {
         lmodat: String,
         lmotim: String
     ): Int {
-        return newSuspendedTransaction {
-            val insertStatement = WalletAddressesTable.insert {
-                it[walNum] = request.walNum
-                it[wadAddress] = request.wadAddress
-                it[wadKeyInfo] = request.wadKeyInfo
-                it[wadScriptInfo] = request.wadScriptInfo
-                it[WalletAddressesTable.creusr] = creusr
-                it[WalletAddressesTable.credat] = credat
-                it[WalletAddressesTable.cretim] = cretim
-                it[WalletAddressesTable.lmousr] = lmousr
-                it[WalletAddressesTable.lmodat] = lmodat
-                it[WalletAddressesTable.lmotim] = lmotim
-                it[active] = "1"
-            }
-            insertStatement[WalletAddressesTable.wadNum]
+        val insertStatement = WalletAddressesTable.insert {
+            it[walNum] = request.walNum
+            it[wadAddress] = request.wadAddress
+            it[wadKeyInfo] = request.wadKeyInfo
+            it[wadScriptInfo] = request.wadScriptInfo
+            it[WalletAddressesTable.creusr] = creusr
+            it[WalletAddressesTable.credat] = credat
+            it[WalletAddressesTable.cretim] = cretim
+            it[WalletAddressesTable.lmousr] = lmousr
+            it[WalletAddressesTable.lmodat] = lmodat
+            it[WalletAddressesTable.lmotim] = lmotim
+            it[active] = "1"
         }
+        return insertStatement[WalletAddressesTable.wadNum]
     }
 
     suspend fun updateWAD(

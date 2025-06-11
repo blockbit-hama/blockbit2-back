@@ -51,7 +51,6 @@ class WalletsRepository {
                 .singleOrNull()
         }
     }
-
     suspend fun insertWAL(
         request: WalletsRequestDTO,
         creusr: Int,
@@ -61,25 +60,23 @@ class WalletsRepository {
         lmodat: String,
         lmotim: String
     ): Int {
-        return newSuspendedTransaction {
-            val insertStatement = WalletsTable.insert {
-                it[walName] = request.walName
-                it[walType] = request.walType
-                it[walProtocol] = request.walProtocol
-                it[walStatus] = request.walStatus
-                it[usiNum] = request.usiNum
-                it[astNum] = request.astNum
-                it[polNum] = request.polNum
-                it[WalletsTable.creusr] = creusr
-                it[WalletsTable.credat] = credat
-                it[WalletsTable.cretim] = cretim
-                it[WalletsTable.lmousr] = lmousr
-                it[WalletsTable.lmodat] = lmodat
-                it[WalletsTable.lmotim] = lmotim
-                it[active] = "1"
-            }
-            insertStatement[WalletsTable.walNum]
+        val insertStatement = WalletsTable.insert {
+            it[walName] = request.walName
+            it[walType] = request.walType
+            it[walProtocol] = request.walProtocol
+            it[walStatus] = request.walStatus
+            it[usiNum] = request.usiNum
+            it[astNum] = request.astNum
+            it[polNum] = request.polNum
+            it[WalletsTable.creusr] = creusr
+            it[WalletsTable.credat] = credat
+            it[WalletsTable.cretim] = cretim
+            it[WalletsTable.lmousr] = lmousr
+            it[WalletsTable.lmodat] = lmodat
+            it[WalletsTable.lmotim] = lmotim
+            it[active] = "1"
         }
+        return insertStatement[WalletsTable.walNum]
     }
 
     suspend fun updateWAL(
