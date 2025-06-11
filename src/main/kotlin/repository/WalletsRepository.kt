@@ -3,7 +3,6 @@ package com.sg.repository
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletsResponseDTO
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 object WalletsTable : Table("wallets") {
     val walNum = integer("wal_num").autoIncrement()          // 지갑 번호 (SERIAL PRIMARY KEY)
@@ -27,31 +26,27 @@ object WalletsTable : Table("wallets") {
 
 class WalletsRepository {
 
-    suspend fun selectWALList(offset: Int?, limit: Int?): List<WalletsResponseDTO> {
-        return newSuspendedTransaction {
-            WalletsTable
-                .select { WalletsTable.active eq "1" }
-                .orderBy(WalletsTable.walNum to SortOrder.DESC)
-                .let { query ->
-                    if (offset != null && limit != null) {
-                        query.limit(limit, offset.toLong())
-                    } else {
-                        query
-                    }
+    fun selectWALList(offset: Int?, limit: Int?): List<WalletsResponseDTO> {
+        return WalletsTable
+            .select { WalletsTable.active eq "1" }
+            .orderBy(WalletsTable.walNum to SortOrder.DESC)
+            .let { query ->
+                if (offset != null && limit != null) {
+                    query.limit(limit, offset.toLong())
+                } else {
+                    query
                 }
-                .map { WalletsResponseDTO.fromResultRow(it) }
-        }
+            }
+            .map { WalletsResponseDTO.fromResultRow(it) }
     }
 
-    suspend fun selectWAL(walNum: Int): WalletsResponseDTO? {
-        return newSuspendedTransaction {
-            WalletsTable
-                .select { (WalletsTable.walNum eq walNum) and (WalletsTable.active eq "1") }
-                .map { WalletsResponseDTO.fromResultRow(it) }
-                .singleOrNull()
-        }
+    fun selectWAL(walNum: Int): WalletsResponseDTO? {
+        return WalletsTable
+            .select { (WalletsTable.walNum eq walNum) and (WalletsTable.active eq "1") }
+            .map { WalletsResponseDTO.fromResultRow(it) }
+            .singleOrNull()
     }
-    suspend fun insertWAL(
+    fun insertWAL(
         request: WalletsRequestDTO,
         creusr: Int,
         credat: String,
@@ -79,42 +74,38 @@ class WalletsRepository {
         return insertStatement[WalletsTable.walNum]
     }
 
-    suspend fun updateWAL(
+    fun updateWAL(
         requestDTO: WalletsRequestDTO,
         lmousr: Int,
         lmodat: String,
         lmotim: String
     ): Boolean {
-        return newSuspendedTransaction {
-            val updateCount = WalletsTable.update(
-                where = { (WalletsTable.walNum eq requestDTO.walNum as Int) and (WalletsTable.active eq "1") }
-            ) {
-                it[walName] = requestDTO.walName
-                it[walType] = requestDTO.walType
-                it[walProtocol] = requestDTO.walProtocol
-                it[walStatus] = requestDTO.walStatus
-                it[usiNum] = requestDTO.usiNum
-                it[astNum] = requestDTO.astNum
-                it[polNum] = requestDTO.polNum
-                it[WalletsTable.lmousr] = lmousr
-                it[WalletsTable.lmodat] = lmodat
-                it[WalletsTable.lmotim] = lmotim
-            }
-            updateCount > 0
+        val updateCount = WalletsTable.update(
+            where = { (WalletsTable.walNum eq requestDTO.walNum as Int) and (WalletsTable.active eq "1") }
+        ) {
+            it[walName] = requestDTO.walName
+            it[walType] = requestDTO.walType
+            it[walProtocol] = requestDTO.walProtocol
+            it[walStatus] = requestDTO.walStatus
+            it[usiNum] = requestDTO.usiNum
+            it[astNum] = requestDTO.astNum
+            it[polNum] = requestDTO.polNum
+            it[WalletsTable.lmousr] = lmousr
+            it[WalletsTable.lmodat] = lmodat
+            it[WalletsTable.lmotim] = lmotim
         }
+        return updateCount > 0
     }
 
-    suspend fun deleteWAL(walNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
-        return newSuspendedTransaction {
-            val updateCount = WalletsTable.update(
-                where = { (WalletsTable.walNum eq walNum) and (WalletsTable.active eq "1") }
-            ) {
-                it[active] = "0"
-                it[WalletsTable.lmousr] = lmousr
-                it[WalletsTable.lmodat] = lmodat
-                it[WalletsTable.lmotim] = lmotim
-            }
-            updateCount > 0
+    fun deleteWAL(walNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
+        val updateCount = WalletsTable.update(
+            where = { (WalletsTable.walNum eq walNum) and (WalletsTable.active eq "1") }
+        ) {
+            it[active] = "0"
+            it[WalletsTable.lmousr] = lmousr
+            it[WalletsTable.lmodat] = lmodat
+            it[WalletsTable.lmotim] = lmotim
         }
+        return updateCount > 0
     }
 }

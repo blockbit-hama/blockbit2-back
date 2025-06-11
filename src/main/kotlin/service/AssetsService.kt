@@ -1,5 +1,6 @@
 package com.sg.service
 
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.AssetsRequestDTO
 import com.sg.dto.AssetsResponseDTO
 import com.sg.repository.AssetsRepository
@@ -10,15 +11,15 @@ class AssetsService(
     private val assetsRepository: AssetsRepository
 ) {
     
-    suspend fun selectASTList(offset: Int?, limit: Int?): List<AssetsResponseDTO> {
-        return assetsRepository.selectASTList(offset, limit)
+    suspend fun selectASTList(offset: Int?, limit: Int?): List<AssetsResponseDTO> = dbQuery {
+        assetsRepository.selectASTList(offset, limit)
     }
     
-    suspend fun selectAST(astNum: Int): AssetsResponseDTO? {
-        return assetsRepository.selectAST(astNum)
+    suspend fun selectAST(astNum: Int): AssetsResponseDTO? = dbQuery {
+        assetsRepository.selectAST(astNum)
     }
     
-    suspend fun insertAST(request: AssetsRequestDTO, userId: Int): Int {
+    suspend fun insertAST(request: AssetsRequestDTO, userId: Int): Int = dbQuery {
         require(request.astName.isNotBlank()) { "Asset name is required" }
         require(request.astSymbol.isNotBlank()) { "Asset symbol is required" }
         require(request.astType.isNotBlank()) { "Asset type is required" }
@@ -30,7 +31,7 @@ class AssetsService(
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        return assetsRepository.insertAST(
+        assetsRepository.insertAST(
             request = request,
             creusr = userId,
             credat = currentDate,
@@ -41,7 +42,7 @@ class AssetsService(
         )
     }
 
-    suspend fun updateAST(requestDTO: AssetsRequestDTO, userId: Int): Boolean {
+    suspend fun updateAST(requestDTO: AssetsRequestDTO, userId: Int): Boolean = dbQuery {
         require(requestDTO.astName.isNotBlank()) { "Asset name is required" }
         require(requestDTO.astSymbol.isNotBlank()) { "Asset symbol is required" }
         require(requestDTO.astType.isNotBlank()) { "Asset type is required" }
@@ -53,7 +54,7 @@ class AssetsService(
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        return assetsRepository.updateAST(
+        assetsRepository.updateAST(
             requestDTO = requestDTO,
             lmousr = userId,
             lmodat = currentDate,
@@ -61,12 +62,12 @@ class AssetsService(
         )
     }
     
-    suspend fun deleteAST(astNum: Int, userId: Int): Boolean {
+    suspend fun deleteAST(astNum: Int, userId: Int): Boolean = dbQuery {
         val now = LocalDateTime.now()
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        return assetsRepository.deleteAST(
+        assetsRepository.deleteAST(
             astNum = astNum,
             lmousr = userId,
             lmodat = currentDate,

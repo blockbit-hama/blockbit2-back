@@ -3,7 +3,6 @@ package com.sg.repository
 import com.sg.dto.CommonCodeRequestDTO
 import com.sg.dto.CommonCodeResponseDTO
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 object CommonCodeTable : Table("common_code") {
     val codNum = integer("cod_num").autoIncrement()      // 코드 번호 (SERIAL PRIMARY KEY)
@@ -24,32 +23,28 @@ object CommonCodeTable : Table("common_code") {
 
 class CommonCodeRepository {
 
-    suspend fun selectCODList(offset: Int?, limit: Int?): List<CommonCodeResponseDTO> {
-        return newSuspendedTransaction {
-            CommonCodeTable
-                .select { CommonCodeTable.active eq "1" }
-                .orderBy(CommonCodeTable.codNum to SortOrder.DESC)
-                .let { query ->
-                    if (offset != null && limit != null) {
-                        query.limit(limit, offset.toLong())
-                    } else {
-                        query
-                    }
+    fun selectCODList(offset: Int?, limit: Int?): List<CommonCodeResponseDTO> {
+        return CommonCodeTable
+            .select { CommonCodeTable.active eq "1" }
+            .orderBy(CommonCodeTable.codNum to SortOrder.DESC)
+            .let { query ->
+                if (offset != null && limit != null) {
+                    query.limit(limit, offset.toLong())
+                } else {
+                    query
                 }
-                .map { CommonCodeResponseDTO.fromResultRow(it) }
-        }
+            }
+            .map { CommonCodeResponseDTO.fromResultRow(it) }
     }
 
-    suspend fun selectCOD(codNum: Int): CommonCodeResponseDTO? {
-        return newSuspendedTransaction {
-            CommonCodeTable
-                .select { (CommonCodeTable.codNum eq codNum) and (CommonCodeTable.active eq "1") }
-                .map { CommonCodeResponseDTO.fromResultRow(it) }
-                .singleOrNull()
-        }
+    fun selectCOD(codNum: Int): CommonCodeResponseDTO? {
+        return CommonCodeTable
+            .select { (CommonCodeTable.codNum eq codNum) and (CommonCodeTable.active eq "1") }
+            .map { CommonCodeResponseDTO.fromResultRow(it) }
+            .singleOrNull()
     }
 
-    suspend fun insertCOD(
+    fun insertCOD(
         request: CommonCodeRequestDTO,
         creusr: Int,
         credat: String,
@@ -58,57 +53,51 @@ class CommonCodeRepository {
         lmodat: String,
         lmotim: String
     ): Int {
-        return newSuspendedTransaction {
-            val insertStatement = CommonCodeTable.insert {
-                it[codType] = request.codType
-                it[codKey] = request.codKey
-                it[codVal] = request.codVal
-                it[codDesc] = request.codDesc
-                it[CommonCodeTable.creusr] = creusr
-                it[CommonCodeTable.credat] = credat
-                it[CommonCodeTable.cretim] = cretim
-                it[CommonCodeTable.lmousr] = lmousr
-                it[CommonCodeTable.lmodat] = lmodat
-                it[CommonCodeTable.lmotim] = lmotim
-                it[active] = "1"
-            }
-            insertStatement[CommonCodeTable.codNum]
+        val insertStatement = CommonCodeTable.insert {
+            it[codType] = request.codType
+            it[codKey] = request.codKey
+            it[codVal] = request.codVal
+            it[codDesc] = request.codDesc
+            it[CommonCodeTable.creusr] = creusr
+            it[CommonCodeTable.credat] = credat
+            it[CommonCodeTable.cretim] = cretim
+            it[CommonCodeTable.lmousr] = lmousr
+            it[CommonCodeTable.lmodat] = lmodat
+            it[CommonCodeTable.lmotim] = lmotim
+            it[active] = "1"
         }
+        return insertStatement[CommonCodeTable.codNum]
     }
 
-    suspend fun updateCOD(
+    fun updateCOD(
         requestDTO: CommonCodeRequestDTO,
         lmousr: Int,
         lmodat: String,
         lmotim: String
     ): Boolean {
-        return newSuspendedTransaction {
-            val updateCount = CommonCodeTable.update(
-                where = { (CommonCodeTable.codNum eq requestDTO.codNum as Int) and (CommonCodeTable.active eq "1") }
-            ) {
-                it[codType] = requestDTO.codType
-                it[codKey] = requestDTO.codKey
-                it[codVal] = requestDTO.codVal
-                it[codDesc] = requestDTO.codDesc
-                it[CommonCodeTable.lmousr] = lmousr
-                it[CommonCodeTable.lmodat] = lmodat
-                it[CommonCodeTable.lmotim] = lmotim
-            }
-            updateCount > 0
+        val updateCount = CommonCodeTable.update(
+            where = { (CommonCodeTable.codNum eq requestDTO.codNum as Int) and (CommonCodeTable.active eq "1") }
+        ) {
+            it[codType] = requestDTO.codType
+            it[codKey] = requestDTO.codKey
+            it[codVal] = requestDTO.codVal
+            it[codDesc] = requestDTO.codDesc
+            it[CommonCodeTable.lmousr] = lmousr
+            it[CommonCodeTable.lmodat] = lmodat
+            it[CommonCodeTable.lmotim] = lmotim
         }
+        return updateCount > 0
     }
 
-    suspend fun deleteCOD(codNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
-        return newSuspendedTransaction {
-            val updateCount = CommonCodeTable.update(
-                where = { (CommonCodeTable.codNum eq codNum) and (CommonCodeTable.active eq "1") }
-            ) {
-                it[active] = "0"
-                it[CommonCodeTable.lmousr] = lmousr
-                it[CommonCodeTable.lmodat] = lmodat
-                it[CommonCodeTable.lmotim] = lmotim
-            }
-            updateCount > 0
+    fun deleteCOD(codNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
+        val updateCount = CommonCodeTable.update(
+            where = { (CommonCodeTable.codNum eq codNum) and (CommonCodeTable.active eq "1") }
+        ) {
+            it[active] = "0"
+            it[CommonCodeTable.lmousr] = lmousr
+            it[CommonCodeTable.lmodat] = lmodat
+            it[CommonCodeTable.lmotim] = lmotim
         }
+        return updateCount > 0
     }
 }

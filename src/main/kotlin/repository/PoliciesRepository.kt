@@ -3,7 +3,6 @@ package com.sg.repository
 import com.sg.dto.PoliciesRequestDTO
 import com.sg.dto.PoliciesResponseDTO
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.math.BigDecimal
 
 object PoliciesTable : Table("policies") {
@@ -25,32 +24,28 @@ object PoliciesTable : Table("policies") {
 
 class PoliciesRepository {
 
-    suspend fun selectPOLList(offset: Int?, limit: Int?): List<PoliciesResponseDTO> {
-        return newSuspendedTransaction {
-            PoliciesTable
-                .select { PoliciesTable.active eq "1" }
-                .orderBy(PoliciesTable.polNum to SortOrder.DESC)
-                .let { query ->
-                    if (offset != null && limit != null) {
-                        query.limit(limit, offset.toLong())
-                    } else {
-                        query
-                    }
+    fun selectPOLList(offset: Int?, limit: Int?): List<PoliciesResponseDTO> {
+        return PoliciesTable
+            .select { PoliciesTable.active eq "1" }
+            .orderBy(PoliciesTable.polNum to SortOrder.DESC)
+            .let { query ->
+                if (offset != null && limit != null) {
+                    query.limit(limit, offset.toLong())
+                } else {
+                    query
                 }
-                .map { PoliciesResponseDTO.fromResultRow(it) }
-        }
+            }
+            .map { PoliciesResponseDTO.fromResultRow(it) }
     }
 
-    suspend fun selectPOL(polNum: Int): PoliciesResponseDTO? {
-        return newSuspendedTransaction {
-            PoliciesTable
-                .select { (PoliciesTable.polNum eq polNum) and (PoliciesTable.active eq "1") }
-                .map { PoliciesResponseDTO.fromResultRow(it) }
-                .singleOrNull()
-        }
+    fun selectPOL(polNum: Int): PoliciesResponseDTO? {
+        return PoliciesTable
+            .select { (PoliciesTable.polNum eq polNum) and (PoliciesTable.active eq "1") }
+            .map { PoliciesResponseDTO.fromResultRow(it) }
+            .singleOrNull()
     }
 
-    suspend fun insertPOL(
+    fun insertPOL(
         request: PoliciesRequestDTO,
         creusr: Int,
         credat: String,
@@ -59,57 +54,51 @@ class PoliciesRepository {
         lmodat: String,
         lmotim: String
     ): Int {
-        return newSuspendedTransaction {
-            val insertStatement = PoliciesTable.insert {
-                it[polApprovalThreshold] = request.polApprovalThreshold
-                it[polMaxDailyLimit] = request.polMaxDailyLimitDecimal
-                it[polSpendingLimit] = request.polSpendingLimitDecimal
-                it[polWhitelistOnly] = request.polWhitelistOnly
-                it[PoliciesTable.creusr] = creusr
-                it[PoliciesTable.credat] = credat
-                it[PoliciesTable.cretim] = cretim
-                it[PoliciesTable.lmousr] = lmousr
-                it[PoliciesTable.lmodat] = lmodat
-                it[PoliciesTable.lmotim] = lmotim
-                it[active] = "1"
-            }
-            insertStatement[PoliciesTable.polNum]
+        val insertStatement = PoliciesTable.insert {
+            it[polApprovalThreshold] = request.polApprovalThreshold
+            it[polMaxDailyLimit] = request.polMaxDailyLimitDecimal
+            it[polSpendingLimit] = request.polSpendingLimitDecimal
+            it[polWhitelistOnly] = request.polWhitelistOnly
+            it[PoliciesTable.creusr] = creusr
+            it[PoliciesTable.credat] = credat
+            it[PoliciesTable.cretim] = cretim
+            it[PoliciesTable.lmousr] = lmousr
+            it[PoliciesTable.lmodat] = lmodat
+            it[PoliciesTable.lmotim] = lmotim
+            it[active] = "1"
         }
+        return insertStatement[PoliciesTable.polNum]
     }
 
-    suspend fun updatePOL(
+    fun updatePOL(
         requestDTO: PoliciesRequestDTO,
         lmousr: Int,
         lmodat: String,
         lmotim: String
     ): Boolean {
-        return newSuspendedTransaction {
-            val updateCount = PoliciesTable.update(
-                where = { (PoliciesTable.polNum eq requestDTO.polNum as Int) and (PoliciesTable.active eq "1") }
-            ) {
-                it[polApprovalThreshold] = requestDTO.polApprovalThreshold
-                it[polMaxDailyLimit] = requestDTO.polMaxDailyLimitDecimal
-                it[polSpendingLimit] = requestDTO.polSpendingLimitDecimal
-                it[polWhitelistOnly] = requestDTO.polWhitelistOnly
-                it[PoliciesTable.lmousr] = lmousr
-                it[PoliciesTable.lmodat] = lmodat
-                it[PoliciesTable.lmotim] = lmotim
-            }
-            updateCount > 0
+        val updateCount = PoliciesTable.update(
+            where = { (PoliciesTable.polNum eq requestDTO.polNum as Int) and (PoliciesTable.active eq "1") }
+        ) {
+            it[polApprovalThreshold] = requestDTO.polApprovalThreshold
+            it[polMaxDailyLimit] = requestDTO.polMaxDailyLimitDecimal
+            it[polSpendingLimit] = requestDTO.polSpendingLimitDecimal
+            it[polWhitelistOnly] = requestDTO.polWhitelistOnly
+            it[PoliciesTable.lmousr] = lmousr
+            it[PoliciesTable.lmodat] = lmodat
+            it[PoliciesTable.lmotim] = lmotim
         }
+        return updateCount > 0
     }
 
-    suspend fun deletePOL(polNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
-        return newSuspendedTransaction {
-            val updateCount = PoliciesTable.update(
-                where = { (PoliciesTable.polNum eq polNum) and (PoliciesTable.active eq "1") }
-            ) {
-                it[active] = "0"
-                it[PoliciesTable.lmousr] = lmousr
-                it[PoliciesTable.lmodat] = lmodat
-                it[PoliciesTable.lmotim] = lmotim
-            }
-            updateCount > 0
+    fun deletePOL(polNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
+        val updateCount = PoliciesTable.update(
+            where = { (PoliciesTable.polNum eq polNum) and (PoliciesTable.active eq "1") }
+        ) {
+            it[active] = "0"
+            it[PoliciesTable.lmousr] = lmousr
+            it[PoliciesTable.lmodat] = lmodat
+            it[PoliciesTable.lmotim] = lmotim
         }
+        return updateCount > 0
     }
 }

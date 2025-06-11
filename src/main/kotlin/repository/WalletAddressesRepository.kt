@@ -3,7 +3,6 @@ package com.sg.repository
 import com.sg.dto.WalletAddressesRequestDTO
 import com.sg.dto.WalletAddressesResponseDTO
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 object WalletAddressesTable : Table("wallet_addresses") {
     val wadNum = integer("wad_num").autoIncrement()             // 월렛 주소 번호 (SERIAL PRIMARY KEY)
@@ -30,47 +29,41 @@ object WalletAddressesTable : Table("wallet_addresses") {
 
 class WalletAddressesRepository {
 
-    suspend fun selectWADList(offset: Int?, limit: Int?, walNum: Int? = null): List<WalletAddressesResponseDTO> {
-        return newSuspendedTransaction {
-            val query = if (walNum != null) {
-                WalletAddressesTable
-                    .select { (WalletAddressesTable.active eq "1") and (WalletAddressesTable.walNum eq walNum) }
-            } else {
-                WalletAddressesTable
-                    .select { WalletAddressesTable.active eq "1" }
-            }
-            
-            val orderedQuery = query.orderBy(WalletAddressesTable.wadNum to SortOrder.DESC)
-            
-            val finalQuery = if (limit != null && offset != null) {
-                orderedQuery.limit(limit, offset.toLong())
-            } else {
-                orderedQuery
-            }
-            
-            finalQuery.map { WalletAddressesResponseDTO.fromResultRow(it) }
-        }
-    }
-
-    suspend fun selectWAD(wadNum: Int): WalletAddressesResponseDTO? {
-        return newSuspendedTransaction {
+    fun selectWADList(offset: Int?, limit: Int?, walNum: Int? = null): List<WalletAddressesResponseDTO> {
+        val query = if (walNum != null) {
             WalletAddressesTable
-                .select { (WalletAddressesTable.wadNum eq wadNum) and (WalletAddressesTable.active eq "1") }
-                .map { WalletAddressesResponseDTO.fromResultRow(it) }
-                .singleOrNull()
-        }
-    }
-
-    suspend fun selectWADByWallet(walNum: Int): List<WalletAddressesResponseDTO> {
-        return newSuspendedTransaction {
+                .select { (WalletAddressesTable.active eq "1") and (WalletAddressesTable.walNum eq walNum) }
+        } else {
             WalletAddressesTable
-                .select { (WalletAddressesTable.walNum eq walNum) and (WalletAddressesTable.active eq "1") }
-                .orderBy(WalletAddressesTable.wadNum to SortOrder.DESC)
-                .map { WalletAddressesResponseDTO.fromResultRow(it) }
+                .select { WalletAddressesTable.active eq "1" }
         }
+        
+        val orderedQuery = query.orderBy(WalletAddressesTable.wadNum to SortOrder.DESC)
+        
+        val finalQuery = if (limit != null && offset != null) {
+            orderedQuery.limit(limit, offset.toLong())
+        } else {
+            orderedQuery
+        }
+        
+        return finalQuery.map { WalletAddressesResponseDTO.fromResultRow(it) }
     }
 
-    suspend fun insertWAD(
+    fun selectWAD(wadNum: Int): WalletAddressesResponseDTO? {
+        return WalletAddressesTable
+            .select { (WalletAddressesTable.wadNum eq wadNum) and (WalletAddressesTable.active eq "1") }
+            .map { WalletAddressesResponseDTO.fromResultRow(it) }
+            .singleOrNull()
+    }
+
+    fun selectWADByWallet(walNum: Int): List<WalletAddressesResponseDTO> {
+        return WalletAddressesTable
+            .select { (WalletAddressesTable.walNum eq walNum) and (WalletAddressesTable.active eq "1") }
+            .orderBy(WalletAddressesTable.wadNum to SortOrder.DESC)
+            .map { WalletAddressesResponseDTO.fromResultRow(it) }
+    }
+
+    fun insertWAD(
         request: WalletAddressesRequestDTO,
         creusr: Int,
         credat: String,
@@ -95,48 +88,42 @@ class WalletAddressesRepository {
         return insertStatement[WalletAddressesTable.wadNum]
     }
 
-    suspend fun updateWAD(
+    fun updateWAD(
         requestDTO: WalletAddressesRequestDTO,
         lmousr: Int,
         lmodat: String,
         lmotim: String
     ): Boolean {
-        return newSuspendedTransaction {
-            val updateCount = WalletAddressesTable.update(
-                where = { (WalletAddressesTable.wadNum eq requestDTO.wadNum as Int) and (WalletAddressesTable.active eq "1") }
-            ) {
-                it[walNum] = requestDTO.walNum
-                it[wadAddress] = requestDTO.wadAddress
-                it[wadKeyInfo] = requestDTO.wadKeyInfo
-                it[wadScriptInfo] = requestDTO.wadScriptInfo
-                it[WalletAddressesTable.lmousr] = lmousr
-                it[WalletAddressesTable.lmodat] = lmodat
-                it[WalletAddressesTable.lmotim] = lmotim
-            }
-            updateCount > 0
+        val updateCount = WalletAddressesTable.update(
+            where = { (WalletAddressesTable.wadNum eq requestDTO.wadNum as Int) and (WalletAddressesTable.active eq "1") }
+        ) {
+            it[walNum] = requestDTO.walNum
+            it[wadAddress] = requestDTO.wadAddress
+            it[wadKeyInfo] = requestDTO.wadKeyInfo
+            it[wadScriptInfo] = requestDTO.wadScriptInfo
+            it[WalletAddressesTable.lmousr] = lmousr
+            it[WalletAddressesTable.lmodat] = lmodat
+            it[WalletAddressesTable.lmotim] = lmotim
         }
+        return updateCount > 0
     }
 
-    suspend fun deleteWAD(wadNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
-        return newSuspendedTransaction {
-            val updateCount = WalletAddressesTable.update(
-                where = { (WalletAddressesTable.wadNum eq wadNum) and (WalletAddressesTable.active eq "1") }
-            ) {
-                it[active] = "0"
-                it[WalletAddressesTable.lmousr] = lmousr
-                it[WalletAddressesTable.lmodat] = lmodat
-                it[WalletAddressesTable.lmotim] = lmotim
-            }
-            updateCount > 0
+    fun deleteWAD(wadNum: Int, lmousr: Int, lmodat: String, lmotim: String): Boolean {
+        val updateCount = WalletAddressesTable.update(
+            where = { (WalletAddressesTable.wadNum eq wadNum) and (WalletAddressesTable.active eq "1") }
+        ) {
+            it[active] = "0"
+            it[WalletAddressesTable.lmousr] = lmousr
+            it[WalletAddressesTable.lmodat] = lmodat
+            it[WalletAddressesTable.lmotim] = lmotim
         }
+        return updateCount > 0
     }
 
-    suspend fun selectWADByAddress(wadAddress: String): WalletAddressesResponseDTO? {
-        return newSuspendedTransaction {
-            WalletAddressesTable
-                .select { (WalletAddressesTable.wadAddress eq wadAddress) and (WalletAddressesTable.active eq "1") }
-                .map { WalletAddressesResponseDTO.fromResultRow(it) }
-                .singleOrNull()
-        }
+    fun selectWADByAddress(wadAddress: String): WalletAddressesResponseDTO? {
+        return WalletAddressesTable
+            .select { (WalletAddressesTable.wadAddress eq wadAddress) and (WalletAddressesTable.active eq "1") }
+            .map { WalletAddressesResponseDTO.fromResultRow(it) }
+            .singleOrNull()
     }
 }
