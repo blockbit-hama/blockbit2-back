@@ -56,10 +56,10 @@ class BitcoinMultiSigService(
     /**
      * 2-of-3 멀티시그 지갑 생성
      */
-    suspend fun createMultisigWallet(
+    fun createMultisigWallet(
         walletRequest: WalletsRequestDTO,
         userId: Int
-    ): MultisigWalletDTO = dbQuery {
+    ): MultisigWalletDTO {
         try {
             // 3개의 키 쌍 생성
             val keys = ArrayList<ECKey>()
@@ -111,9 +111,6 @@ class BitcoinMultiSigService(
                     wadScriptInfo = scriptInfoJson
                 )
 
-                // 테스트용 예외 발생 (이제 전체가 롤백됨)
-                throw RuntimeException("test@@")
-
                 val addressId = walletAddressesService.insertWAD(addressRequest, userId)
                 
                 logger.info("Bitcoin wallet saved to DB - User: $userId, WalletId: $walletId, AddressId: $addressId, Name: '${walletRequest.walName}', Type: '${walletRequest.walType}', Address: ${multiSigAddress}")
@@ -123,7 +120,7 @@ class BitcoinMultiSigService(
                 throw RuntimeException("Failed to save wallet to database", dbException)
             }
 
-            MultisigWalletDTO().apply {
+            return MultisigWalletDTO().apply {
                 address = multiSigAddress.toString()
                 this.redeemScript = Utils.HEX.encode(redeemScript.program)
                 this.publicKeys = publicKeys

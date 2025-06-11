@@ -1,5 +1,6 @@
 package com.sg.route
 
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.PoliciesRequestDTO
 import com.sg.dto.common.SimpleSuccessResponse
 import com.sg.dto.common.SuccessResponse
@@ -22,7 +23,9 @@ fun Route.policiesRoute(policiesService: PoliciesService) {
                 val offset = call.request.queryParameters["offset"]?.toIntOrNull()
                 val limit = call.request.queryParameters["limit"]?.toIntOrNull()
 
-                val result = policiesService.selectPOLList(offset, limit)
+                val result = dbQuery {
+                    policiesService.selectPOLList(offset, limit)
+                }
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
             
@@ -30,8 +33,9 @@ fun Route.policiesRoute(policiesService: PoliciesService) {
                 val polNum = call.parameters["polNum"]?.toIntOrNull()
                     ?: throw BadRequestException("Valid pol_num is required")
 
-                val result = policiesService.selectPOL(polNum)
-                    ?: throw NotFoundException("Policy not found")
+                val result = dbQuery {
+                    policiesService.selectPOL(polNum)
+                } ?: throw NotFoundException("Policy not found")
 
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
@@ -42,7 +46,9 @@ fun Route.policiesRoute(policiesService: PoliciesService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<PoliciesRequestDTO>()
-                val polNum = policiesService.insertPOL(request, userId)
+                val polNum = dbQuery {
+                    policiesService.insertPOL(request, userId)
+                }
 
                 call.respond(
                     HttpStatusCode.Created,
@@ -59,7 +65,9 @@ fun Route.policiesRoute(policiesService: PoliciesService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<PoliciesRequestDTO>()
-                val result = policiesService.updatePOL(request, userId)
+                val result = dbQuery {
+                    policiesService.updatePOL(request, userId)
+                }
 
                 if (!result) throw NotFoundException("Policy not found")
                 
@@ -77,7 +85,9 @@ fun Route.policiesRoute(policiesService: PoliciesService) {
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
                 
-                val result = policiesService.deletePOL(polNum, userId)
+                val result = dbQuery {
+                    policiesService.deletePOL(polNum, userId)
+                }
                 if (!result) throw NotFoundException("Policy not found")
                 
                 call.respond(

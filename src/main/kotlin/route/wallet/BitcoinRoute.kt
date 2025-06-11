@@ -2,6 +2,7 @@ package com.sg.route.wallet
 
 import com.sg.dto.wallet.*
 import com.sg.dto.WalletsRequestDTO
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.service.wallet.BitcoinMultiSigService
 import com.sg.utils.JwtUtil
 import com.sg.exception.BadRequestException
@@ -27,7 +28,10 @@ fun Route.bitcoinRoutes(
 
                         val walletRequest = call.receive<WalletsRequestDTO>()
 
-                        val wallet = bitcoinMultiSigService.createMultisigWallet(walletRequest, userId)
+                        val wallet = dbQuery {
+                            bitcoinMultiSigService.createMultisigWallet(walletRequest, userId)
+                        }
+
                         call.respond(HttpStatusCode.Created, wallet)
                     } catch (e: BadRequestException) {
                         call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))

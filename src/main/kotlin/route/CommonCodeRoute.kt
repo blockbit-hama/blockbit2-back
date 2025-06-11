@@ -1,5 +1,6 @@
 package com.sg.route
 
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.CommonCodeRequestDTO
 import com.sg.dto.common.SimpleSuccessResponse
 import com.sg.dto.common.SuccessResponse
@@ -22,7 +23,9 @@ fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
                 val offset = call.request.queryParameters["offset"]?.toIntOrNull()
                 val limit = call.request.queryParameters["limit"]?.toIntOrNull()
 
-                val result = commonCodeService.selectCODList(offset, limit)
+                val result = dbQuery {
+                    commonCodeService.selectCODList(offset, limit)
+                }
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
             
@@ -30,8 +33,9 @@ fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
                 val codNum = call.parameters["codNum"]?.toIntOrNull()
                     ?: throw BadRequestException("Valid cod_num is required")
 
-                val result = commonCodeService.selectCOD(codNum)
-                    ?: throw NotFoundException("Common code not found")
+                val result = dbQuery {
+                    commonCodeService.selectCOD(codNum)
+                } ?: throw NotFoundException("Common code not found")
 
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
@@ -42,7 +46,9 @@ fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<CommonCodeRequestDTO>()
-                val codNum = commonCodeService.insertCOD(request, userId)
+                val codNum = dbQuery {
+                    commonCodeService.insertCOD(request, userId)
+                }
 
                 call.respond(
                     HttpStatusCode.Created,
@@ -59,7 +65,9 @@ fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<CommonCodeRequestDTO>()
-                val result = commonCodeService.updateCOD(request, userId)
+                val result = dbQuery {
+                    commonCodeService.updateCOD(request, userId)
+                }
 
                 if (!result) throw NotFoundException("Common code not found")
                 
@@ -77,7 +85,9 @@ fun Route.commonCodeRoute(commonCodeService: CommonCodeService) {
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
                 
-                val result = commonCodeService.deleteCOD(codNum, userId)
+                val result = dbQuery {
+                    commonCodeService.deleteCOD(codNum, userId)
+                }
                 if (!result) throw NotFoundException("Common code not found")
                 
                 call.respond(

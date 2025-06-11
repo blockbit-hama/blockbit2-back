@@ -1,6 +1,5 @@
 package com.sg.service
 
-import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.WalletAddressesRequestDTO
 import com.sg.dto.WalletAddressesResponseDTO
 import com.sg.repository.WalletAddressesRepository
@@ -14,19 +13,19 @@ class WalletAddressesService(
 ) {
     private val gson = Gson()
     
-    suspend fun selectWADList(offset: Int?, limit: Int?, walNum: Int? = null): List<WalletAddressesResponseDTO> = dbQuery {
-        walletAddressesRepository.selectWADList(offset, limit, walNum)
+    fun selectWADList(offset: Int?, limit: Int?, walNum: Int? = null): List<WalletAddressesResponseDTO> {
+        return walletAddressesRepository.selectWADList(offset, limit, walNum)
     }
     
-    suspend fun selectWAD(wadNum: Int): WalletAddressesResponseDTO? = dbQuery {
-        walletAddressesRepository.selectWAD(wadNum)
+    fun selectWAD(wadNum: Int): WalletAddressesResponseDTO? {
+        return walletAddressesRepository.selectWAD(wadNum)
     }
     
-    suspend fun selectWADByWallet(walNum: Int): List<WalletAddressesResponseDTO> = dbQuery {
-        walletAddressesRepository.selectWADByWallet(walNum)
+    fun selectWADByWallet(walNum: Int): List<WalletAddressesResponseDTO> {
+        return walletAddressesRepository.selectWADByWallet(walNum)
     }
     
-    suspend fun insertWAD(request: WalletAddressesRequestDTO, userId: Int): Int = dbQuery {
+    fun insertWAD(request: WalletAddressesRequestDTO, userId: Int): Int {
         require(request.walNum > 0) { "Valid wallet number is required" }
         require(request.wadAddress.isNotBlank()) { "Wallet address is required" }
         require(request.wadKeyInfo.isNotBlank()) { "Key info is required" }
@@ -41,7 +40,7 @@ class WalletAddressesService(
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        walletAddressesRepository.insertWAD(
+        return walletAddressesRepository.insertWAD(
             request = request,
             creusr = userId,
             credat = currentDate,
@@ -52,7 +51,7 @@ class WalletAddressesService(
         )
     }
 
-    suspend fun updateWAD(requestDTO: WalletAddressesRequestDTO, userId: Int): Boolean = dbQuery {
+    fun updateWAD(requestDTO: WalletAddressesRequestDTO, userId: Int): Boolean {
         require(requestDTO.walNum > 0) { "Valid wallet number is required" }
         require(requestDTO.wadAddress.isNotBlank()) { "Wallet address is required" }
         require(requestDTO.wadKeyInfo.isNotBlank()) { "Key info is required" }
@@ -67,7 +66,7 @@ class WalletAddressesService(
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        walletAddressesRepository.updateWAD(
+        return walletAddressesRepository.updateWAD(
             requestDTO = requestDTO,
             lmousr = userId,
             lmodat = currentDate,
@@ -75,12 +74,12 @@ class WalletAddressesService(
         )
     }
     
-    suspend fun deleteWAD(wadNum: Int, userId: Int): Boolean = dbQuery {
+    fun deleteWAD(wadNum: Int, userId: Int): Boolean {
         val now = LocalDateTime.now()
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        walletAddressesRepository.deleteWAD(
+        return walletAddressesRepository.deleteWAD(
             wadNum = wadNum,
             lmousr = userId,
             lmodat = currentDate,

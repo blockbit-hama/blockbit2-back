@@ -1,6 +1,5 @@
 package com.sg.service
 
-import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.PoliciesRequestDTO
 import com.sg.dto.PoliciesResponseDTO
 import com.sg.repository.PoliciesRepository
@@ -12,15 +11,15 @@ class PoliciesService(
     private val policiesRepository: PoliciesRepository
 ) {
     
-    suspend fun selectPOLList(offset: Int?, limit: Int?): List<PoliciesResponseDTO> = dbQuery {
-        policiesRepository.selectPOLList(offset, limit)
+    fun selectPOLList(offset: Int?, limit: Int?): List<PoliciesResponseDTO> {
+        return policiesRepository.selectPOLList(offset, limit)
     }
     
-    suspend fun selectPOL(polNum: Int): PoliciesResponseDTO? = dbQuery {
-        policiesRepository.selectPOL(polNum)
+    fun selectPOL(polNum: Int): PoliciesResponseDTO? {
+        return policiesRepository.selectPOL(polNum)
     }
     
-    suspend fun insertPOL(request: PoliciesRequestDTO, userId: Int): Int = dbQuery {
+    fun insertPOL(request: PoliciesRequestDTO, userId: Int): Int {
         require(request.polApprovalThreshold > 0) { "Approval threshold must be positive" }
         require(request.polMaxDailyLimit == null || request.polMaxDailyLimit.toLong() > 0) {
             "Max daily limit must be positive" 
@@ -33,7 +32,7 @@ class PoliciesService(
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        policiesRepository.insertPOL(
+        return policiesRepository.insertPOL(
             request = request,
             creusr = userId,
             credat = currentDate,
@@ -44,7 +43,7 @@ class PoliciesService(
         )
     }
 
-    suspend fun updatePOL(requestDTO: PoliciesRequestDTO, userId: Int): Boolean = dbQuery {
+    fun updatePOL(requestDTO: PoliciesRequestDTO, userId: Int): Boolean {
         require(requestDTO.polApprovalThreshold > 0) { "Approval threshold must be positive" }
         require(requestDTO.polMaxDailyLimit == null || requestDTO.polMaxDailyLimit.toLong() > 0) {
             "Max daily limit must be positive" 
@@ -57,7 +56,7 @@ class PoliciesService(
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        policiesRepository.updatePOL(
+        return policiesRepository.updatePOL(
             requestDTO = requestDTO,
             lmousr = userId,
             lmodat = currentDate,
@@ -65,12 +64,12 @@ class PoliciesService(
         )
     }
     
-    suspend fun deletePOL(polNum: Int, userId: Int): Boolean = dbQuery {
+    fun deletePOL(polNum: Int, userId: Int): Boolean {
         val now = LocalDateTime.now()
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        policiesRepository.deletePOL(
+        return policiesRepository.deletePOL(
             polNum = polNum,
             lmousr = userId,
             lmodat = currentDate,

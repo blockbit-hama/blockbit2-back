@@ -1,5 +1,6 @@
 package com.sg.route
 
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.AssetsRequestDTO
 import com.sg.dto.common.SimpleSuccessResponse
 import com.sg.dto.common.SuccessResponse
@@ -22,7 +23,9 @@ fun Route.assetsRoute(assetsService: AssetsService) {
                 val offset = call.request.queryParameters["offset"]?.toIntOrNull()
                 val limit = call.request.queryParameters["limit"]?.toIntOrNull()
 
-                val result = assetsService.selectASTList(offset, limit)
+                val result = dbQuery {
+                    assetsService.selectASTList(offset, limit)
+                }
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
             
@@ -30,8 +33,9 @@ fun Route.assetsRoute(assetsService: AssetsService) {
                 val astNum = call.parameters["astNum"]?.toIntOrNull()
                     ?: throw BadRequestException("Valid ast_num is required")
 
-                val result = assetsService.selectAST(astNum)
-                    ?: throw NotFoundException("Asset not found")
+                val result = dbQuery {
+                    assetsService.selectAST(astNum)
+                } ?: throw NotFoundException("Asset not found")
 
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
@@ -42,7 +46,9 @@ fun Route.assetsRoute(assetsService: AssetsService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<AssetsRequestDTO>()
-                val astNum = assetsService.insertAST(request, userId)
+                val astNum = dbQuery {
+                    assetsService.insertAST(request, userId)
+                }
 
                 call.respond(
                     HttpStatusCode.Created,
@@ -59,7 +65,9 @@ fun Route.assetsRoute(assetsService: AssetsService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<AssetsRequestDTO>()
-                val result = assetsService.updateAST(request, userId)
+                val result = dbQuery {
+                    assetsService.updateAST(request, userId)
+                }
 
                 if (!result) throw NotFoundException("Asset not found")
                 
@@ -77,7 +85,9 @@ fun Route.assetsRoute(assetsService: AssetsService) {
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
                 
-                val result = assetsService.deleteAST(astNum, userId)
+                val result = dbQuery {
+                    assetsService.deleteAST(astNum, userId)
+                }
                 if (!result) throw NotFoundException("Asset not found")
                 
                 call.respond(

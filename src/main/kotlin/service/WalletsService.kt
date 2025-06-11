@@ -1,6 +1,5 @@
 package com.sg.service
 
-import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletsResponseDTO
 import com.sg.repository.WalletsRepository
@@ -11,15 +10,15 @@ class WalletsService(
     private val walletsRepository: WalletsRepository
 ) {
     
-    suspend fun selectWALList(offset: Int?, limit: Int?): List<WalletsResponseDTO> = dbQuery {
-        walletsRepository.selectWALList(offset, limit)
+    fun selectWALList(offset: Int?, limit: Int?): List<WalletsResponseDTO> {
+        return walletsRepository.selectWALList(offset, limit)
     }
     
-    suspend fun selectWAL(walNum: Int): WalletsResponseDTO? = dbQuery {
-        walletsRepository.selectWAL(walNum)
+    fun selectWAL(walNum: Int): WalletsResponseDTO? {
+        return walletsRepository.selectWAL(walNum)
     }
     
-    suspend fun insertWAL(request: WalletsRequestDTO, userId: Int): Int = dbQuery {
+    fun insertWAL(request: WalletsRequestDTO, userId: Int): Int {
         require(request.walName.isNotBlank()) { "Wallet name is required" }
         require(request.walType.isNotBlank()) { "Wallet type is required" }
         require(request.walProtocol.isNotBlank()) { "Wallet protocol is required" }
@@ -40,7 +39,7 @@ class WalletsService(
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        walletsRepository.insertWAL(
+        return walletsRepository.insertWAL(
             request = request,
             creusr = userId,
             credat = currentDate,
@@ -51,7 +50,7 @@ class WalletsService(
         )
     }
 
-    suspend fun updateWAL(requestDTO: WalletsRequestDTO, userId: Int): Boolean = dbQuery {
+    fun updateWAL(requestDTO: WalletsRequestDTO, userId: Int): Boolean {
         require(requestDTO.walName.isNotBlank()) { "Wallet name is required" }
         require(requestDTO.walType.isNotBlank()) { "Wallet type is required" }
         require(requestDTO.walProtocol.isNotBlank()) { "Wallet protocol is required" }
@@ -72,7 +71,7 @@ class WalletsService(
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        walletsRepository.updateWAL(
+        return walletsRepository.updateWAL(
             requestDTO = requestDTO,
             lmousr = userId,
             lmodat = currentDate,
@@ -80,12 +79,12 @@ class WalletsService(
         )
     }
     
-    suspend fun deleteWAL(walNum: Int, userId: Int): Boolean = dbQuery {
+    fun deleteWAL(walNum: Int, userId: Int): Boolean {
         val now = LocalDateTime.now()
         val currentDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val currentTime = now.format(DateTimeFormatter.ofPattern("HHmmss"))
         
-        walletsRepository.deleteWAL(
+        return walletsRepository.deleteWAL(
             walNum = walNum,
             lmousr = userId,
             lmodat = currentDate,

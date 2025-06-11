@@ -1,5 +1,6 @@
 package com.sg.route
 
+import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.common.SimpleSuccessResponse
 import com.sg.dto.common.SuccessResponse
@@ -22,7 +23,9 @@ fun Route.walletsRoute(walletsService: WalletsService) {
                 val offset = call.request.queryParameters["offset"]?.toIntOrNull()
                 val limit = call.request.queryParameters["limit"]?.toIntOrNull()
 
-                val result = walletsService.selectWALList(offset, limit)
+                val result = dbQuery {
+                    walletsService.selectWALList(offset, limit)
+                }
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
             
@@ -30,8 +33,9 @@ fun Route.walletsRoute(walletsService: WalletsService) {
                 val walNum = call.parameters["walNum"]?.toIntOrNull()
                     ?: throw BadRequestException("Valid wal_num is required")
 
-                val result = walletsService.selectWAL(walNum)
-                    ?: throw NotFoundException("Wallet not found")
+                val result = dbQuery {
+                    walletsService.selectWAL(walNum)
+                } ?: throw NotFoundException("Wallet not found")
 
                 call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
             }
@@ -42,7 +46,9 @@ fun Route.walletsRoute(walletsService: WalletsService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<WalletsRequestDTO>()
-                val walNum = walletsService.insertWAL(request, userId)
+                val walNum = dbQuery {
+                    walletsService.insertWAL(request, userId)
+                }
 
                 call.respond(
                     HttpStatusCode.Created,
@@ -59,7 +65,9 @@ fun Route.walletsRoute(walletsService: WalletsService) {
                     ?: throw BadRequestException("User authentication required")
 
                 val request = call.receive<WalletsRequestDTO>()
-                val result = walletsService.updateWAL(request, userId)
+                val result = dbQuery {
+                    walletsService.updateWAL(request, userId)
+                }
 
                 if (!result) throw NotFoundException("Wallet not found")
                 
@@ -77,7 +85,9 @@ fun Route.walletsRoute(walletsService: WalletsService) {
                 val userId = principal?.let { JwtUtil.extractUserId(it) }
                     ?: throw BadRequestException("User authentication required")
                 
-                val result = walletsService.deleteWAL(walNum, userId)
+                val result = dbQuery {
+                    walletsService.deleteWAL(walNum, userId)
+                }
                 if (!result) throw NotFoundException("Wallet not found")
                 
                 call.respond(
