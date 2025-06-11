@@ -10,7 +10,6 @@ object WalletsTable : Table("wallets") {
     val walType = varchar("wal_type", 50)                    // 지갑 타입
     val walProtocol = varchar("wal_protocol", 20)            // 지갑 프로토콜
     val walStatus = varchar("wal_status", 20)                // 지갑 상태
-    val usiNum = integer("usi_num").nullable()               // 사용자 번호 (외래키)
     val astNum = integer("ast_num").nullable()                 // 자산 번호 (외래키)
     val polNum = integer("pol_num").nullable()                 // 정책 번호 (외래키)
     val creusr = integer("creusr").nullable()                // 생성자
@@ -60,7 +59,6 @@ class WalletsRepository {
             it[walType] = request.walType
             it[walProtocol] = request.walProtocol
             it[walStatus] = request.walStatus
-            it[usiNum] = request.usiNum
             it[astNum] = request.astNum
             it[polNum] = request.polNum
             it[WalletsTable.creusr] = creusr
@@ -87,7 +85,6 @@ class WalletsRepository {
             it[walType] = requestDTO.walType
             it[walProtocol] = requestDTO.walProtocol
             it[walStatus] = requestDTO.walStatus
-            it[usiNum] = requestDTO.usiNum
             it[astNum] = requestDTO.astNum
             it[polNum] = requestDTO.polNum
             it[WalletsTable.lmousr] = lmousr

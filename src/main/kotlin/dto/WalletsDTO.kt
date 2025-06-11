@@ -13,7 +13,6 @@ data class WalletsRequestDTO(
     val walType: String,            // 지갑 타입 (Self-custody Hot, Cold, Trading)
     val walProtocol: String,        // 지갑 프로토콜 (MPC, Multisig)
     val walStatus: String,          // 지갑 상태 (frozen, archived, active)
-    val usiNum: Int? = null,        // 사용자 번호 (외래키)
     val astNum: Int? = null,         // 자산 번호 (외래키)
     val polNum: Int? = null          // 정책 번호 (외래키)
 ) : CommonRequestDTO() {
@@ -45,7 +44,6 @@ data class WalletsResponseDTO(
     val walType: String,            // 지갑 타입
     val walProtocol: String,        // 지갑 프로토콜
     val walStatus: String,          // 지갑 상태
-    val usiNum: Int?,               // 사용자 번호 (외래키)
     val astNum: Int?,                // 자산 번호 (외래키)
     val polNum: Int?,                // 정책 번호 (외래키)
     
@@ -66,7 +64,6 @@ data class WalletsResponseDTO(
                 walType = row[WalletsTable.walType],
                 walProtocol = row[WalletsTable.walProtocol],
                 walStatus = row[WalletsTable.walStatus],
-                usiNum = row[WalletsTable.usiNum],
                 astNum = row[WalletsTable.astNum],
                 polNum = row[WalletsTable.polNum],
                 creusr = row[WalletsTable.creusr],
