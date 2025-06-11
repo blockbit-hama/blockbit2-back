@@ -1,6 +1,7 @@
 package com.sg.service.wallet
 
 import com.sg.config.factory.DatabaseFactory.dbQuery
+import com.sg.dto.TransactionsRequestDTO
 import com.sg.dto.WalUsiMappRequestDTO
 import com.sg.dto.wallet.MultisigWalletDTO
 import com.sg.dto.wallet.PartiallySignedTransactionDTO
@@ -9,6 +10,7 @@ import com.sg.service.WalletsService
 import com.sg.service.WalletAddressesService
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletAddressesRequestDTO
+import com.sg.service.TransactionsService
 import com.sg.service.WalUsiMappService
 import org.bitcoinj.core.*
 import org.bitcoinj.crypto.TransactionSignature
@@ -21,7 +23,8 @@ class BitcoinMultiSigService(
     private val apiKey: String = "",
     private val walletsService: WalletsService,
     private val walletAddressesService: WalletAddressesService,
-    private val walUsiMappService: WalUsiMappService
+    private val walUsiMappService: WalUsiMappService,
+    private val transactionsService: TransactionsService
 ) {
 
     private val logger = LoggerFactory.getLogger(BitcoinMultiSigService::class.java)
@@ -151,7 +154,10 @@ class BitcoinMultiSigService(
         toAddress: String,
         amountSatoshi: Long,
         redeemScriptHex: String,
-        privateKeyHex: String
+        privateKeyHex: String,
+        walNum: Int,
+        wadNum: Int,
+        userId: Int
     ): PartiallySignedTransactionDTO {
 
         try {
@@ -216,13 +222,30 @@ class BitcoinMultiSigService(
             val signature = privateKey.sign(sigHash)
             val txSig = TransactionSignature(signature, Transaction.SigHash.ALL, false)
 
-            // 부분적으로 서명된 트랜잭션 반환
-            return PartiallySignedTransactionDTO().apply {
+            val result = PartiallySignedTransactionDTO().apply {
                 transactionHex = Utils.HEX.encode(tx.bitcoinSerialize())
                 signatureHex = Utils.HEX.encode(txSig.encodeToBitcoin())
                 publicKeyHex = privateKey.publicKeyAsHex
                 this.redeemScriptHex = redeemScriptHex
             }
+
+            val gson = com.google.gson.Gson()
+            val scriptInfoJson = gson.toJson(result)
+
+            val transactionRequest = TransactionsRequestDTO(
+                trxToAddr = toAddress,                                              // 화면에서 받은 수신 주소
+                trxAmount = (amountSatoshi.toDouble() / 100_000_000.0).toString(), // satoshi → BTC 변환
+                trxFee = (estimatedFee.toDouble() / 100_000_000.0).toString(),     // 계산된 수수료
+                trxStatus = "created",                                              // 고정값
+                trxScriptInfo = scriptInfoJson,                                     // PartiallySignedTransactionDTO JSON
+                walNum = walNum,                                                    // 화면에서 받은 지갑 번호
+                wadNum = wadNum                                                     // 화면에서 받은 주소 번호
+            )
+
+            val trxNum = transactionsService.insertTRX(transactionRequest, userId)
+            logger.info("Transaction saved to DB - TrxNum: $trxNum, WalNum: $walNum, WadNum: $wadNum, UserId: $userId")
+
+            return result
         } catch (e: Exception) {
             logger.error("트랜잭션 생성 오류", e)
             throw RuntimeException("트랜잭션 생성 실패: ${e.message}", e)

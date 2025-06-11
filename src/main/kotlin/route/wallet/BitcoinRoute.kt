@@ -43,14 +43,25 @@ fun Route.bitcoinRoutes(
                 // 비트코인 멀티시그 트랜잭션 생성 (첫 번째 서명)
                 post("/transaction/create") {
                     try {
+                        val principal = call.principal<JWTPrincipal>()
+                        val userId = principal?.let { JwtUtil.extractUserId(it) }
+                            ?: throw BadRequestException("User authentication required")
+
                         val request = call.receive<BitcoinTransactionRequestDTO>()
-                        val tx = bitcoinMultiSigService.createMultisigTransaction(
-                            request.fromAddress,
-                            request.toAddress,
-                            request.amountSatoshi,
-                            request.redeemScriptHex,
-                            request.privateKeyHex
-                        )
+
+                        val tx = dbQuery {
+                            bitcoinMultiSigService.createMultisigTransaction(
+                                request.fromAddress,
+                                request.toAddress,
+                                request.amountSatoshi,
+                                request.redeemScriptHex,
+                                request.privateKeyHex,
+                                request.walNum ?: 0,
+                                request.wadNum ?: 0,
+                                userId
+                            )
+                        }
+
                         call.respond(HttpStatusCode.OK, tx)
                     } catch (e: Exception) {
                         call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to create Bitcoin transaction: ${e.message}"))
