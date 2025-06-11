@@ -1,6 +1,7 @@
 package com.sg.service.wallet
 
 import com.sg.config.factory.DatabaseFactory.dbQuery
+import com.sg.dto.WalUsiMappRequestDTO
 import com.sg.dto.wallet.MultisigWalletDTO
 import com.sg.dto.wallet.PartiallySignedTransactionDTO
 import com.sg.utils.wallet.bitcoin.BlockCypherClient
@@ -8,6 +9,7 @@ import com.sg.service.WalletsService
 import com.sg.service.WalletAddressesService
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletAddressesRequestDTO
+import com.sg.service.WalUsiMappService
 import org.bitcoinj.core.*
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.script.Script
@@ -18,7 +20,8 @@ class BitcoinMultiSigService(
     private val apiBaseUrl: String = "https://api.blockcypher.com/v1/btc/test3",
     private val apiKey: String = "",
     private val walletsService: WalletsService,
-    private val walletAddressesService: WalletAddressesService
+    private val walletAddressesService: WalletAddressesService,
+    private val walUsiMappService: WalUsiMappService
 ) {
 
     private val logger = LoggerFactory.getLogger(BitcoinMultiSigService::class.java)
@@ -112,6 +115,14 @@ class BitcoinMultiSigService(
                 )
 
                 val addressId = walletAddressesService.insertWAD(addressRequest, userId)
+
+                // 4. 지갑, 유저매핑 정보 저장 (admin 권한 부여)
+                val mappRequest = WalUsiMappRequestDTO(
+                    usiNum = userId,
+                    walNum = walletId,
+                    wumRole = "admin"
+                )
+                walUsiMappService.insertWUM(mappRequest, userId)
                 
                 logger.info("Bitcoin wallet saved to DB - User: $userId, WalletId: $walletId, AddressId: $addressId, Name: '${walletRequest.walName}', Type: '${walletRequest.walType}', Address: ${multiSigAddress}")
                 
