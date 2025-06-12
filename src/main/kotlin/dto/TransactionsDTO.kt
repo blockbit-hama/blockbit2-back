@@ -19,7 +19,7 @@ data class TransactionsRequestDTO(
     val trxConfirmedDat: String? = null,        // 컨펌 일자
     val trxConfirmedTim: String? = null,        // 컨펌 시간
     val walNum: Int,                            // 지갑 번호
-    val wadNum: Int? = null                     // 주소 번호
+    val wadNum: Int                   // 주소 번호
 ) : CommonRequestDTO() {
     init {
         require(trxToAddr.isNotBlank()) { "Recipient address cannot be blank" }
@@ -120,7 +120,7 @@ data class TransactionsResponseDTO(
     val trxConfirmedDat: String?,               // 컨펌 일자
     val trxConfirmedTim: String?,               // 컨펌 시간
     val walNum: Int,                            // 지갑 번호
-    val wadNum: Int?,                           // 주소 번호
+    val wadNum: Int,                           // 주소 번호
     
     // 공통 컬럼
     override val creusr: Int?,                  // 생성자

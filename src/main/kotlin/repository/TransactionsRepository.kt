@@ -16,7 +16,7 @@ object TransactionsTable : Table("transactions") {
     val trxConfirmedDat = char("trx_confirmed_dat", 8).nullable() // 컨펌 일자 (YYYYMMDD)
     val trxConfirmedTim = char("trx_confirmed_tim", 6).nullable() // 컨펌 시간 (HHMMSS)
     val walNum = integer("wal_num")                         // 지갑 번호
-    val wadNum = integer("wad_num").nullable()              // 주소 번호
+    val wadNum = integer("wad_num")              // 주소 번호
     val creusr = integer("creusr").nullable()               // 생성자
     val credat = char("credat", 8).nullable()               // 생성일자 (YYYYMMDD)
     val cretim = char("cretim", 6).nullable()               // 생성시간 (HHMMSS)
@@ -69,7 +69,6 @@ class TransactionsRepository {
             it[trxScriptInfo] = request.trxScriptInfo
             it[trxConfirmedDat] = request.trxConfirmedDat
             it[trxConfirmedTim] = request.trxConfirmedTim
-            it[walNum] = request.walNum
             it[wadNum] = request.wadNum
             it[TransactionsTable.creusr] = creusr
             it[TransactionsTable.credat] = credat
@@ -99,7 +98,6 @@ class TransactionsRepository {
             it[trxScriptInfo] = requestDTO.trxScriptInfo
             it[trxConfirmedDat] = requestDTO.trxConfirmedDat
             it[trxConfirmedTim] = requestDTO.trxConfirmedTim
-            it[walNum] = requestDTO.walNum
             it[wadNum] = requestDTO.wadNum
             it[TransactionsTable.lmousr] = lmousr
             it[TransactionsTable.lmodat] = lmodat

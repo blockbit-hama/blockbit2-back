@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BitcoinCompleteRequestDTO(
     var partiallySignedTransaction: PartiallySignedTransactionDTO = PartiallySignedTransactionDTO(),
-    var privateKeyHex: String = ""
+    var privateKeyHex: String = "",
+    var trxNum: Int
 )

@@ -51,13 +51,10 @@ fun Route.bitcoinRoutes(
 
                         val tx = dbQuery {
                             bitcoinMultiSigService.createMultisigTransaction(
-                                request.fromAddress,
                                 request.toAddress,
                                 request.amountSatoshi,
-                                request.redeemScriptHex,
                                 request.privateKeyHex,
-                                request.walNum ?: 0,
-                                request.wadNum ?: 0,
+                                request.wadNum,
                                 userId
                             )
                         }
@@ -72,10 +69,14 @@ fun Route.bitcoinRoutes(
                 post("/transaction/complete") {
                     try {
                         val request = call.receive<BitcoinCompleteRequestDTO>()
-                        val txId = bitcoinMultiSigService.addSignatureToTransaction(
-                            request.partiallySignedTransaction,
-                            request.privateKeyHex
-                        )
+
+                        val txId = dbQuery {
+                            bitcoinMultiSigService.addSignatureToTransaction(
+                                request.trxNum,
+                                request.privateKeyHex,
+                            )
+                        }
+
                         call.respond(HttpStatusCode.OK, mapOf(
                             "txId" to txId,
                             "message" to "Transaction successfully broadcasted to the Bitcoin testnet",

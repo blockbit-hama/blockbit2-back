@@ -9,6 +9,5 @@ data class BitcoinTransactionRequestDTO(
     var amountSatoshi: Long = 0,
     var redeemScriptHex: String = "",
     var privateKeyHex: String = "",
-    val walNum: Int? = null,
-    val wadNum: Int? = null
+    val wadNum: Int
 )

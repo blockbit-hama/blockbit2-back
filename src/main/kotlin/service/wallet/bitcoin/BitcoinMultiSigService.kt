@@ -1,6 +1,5 @@
 package com.sg.service.wallet
 
-import com.sg.config.factory.DatabaseFactory.dbQuery
 import com.sg.dto.TransactionsRequestDTO
 import com.sg.dto.WalUsiMappRequestDTO
 import com.sg.dto.wallet.MultisigWalletDTO
@@ -10,6 +9,7 @@ import com.sg.service.WalletsService
 import com.sg.service.WalletAddressesService
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletAddressesRequestDTO
+import com.sg.exception.NotFoundException
 import com.sg.service.TransactionsService
 import com.sg.service.WalUsiMappService
 import org.bitcoinj.core.*
@@ -17,6 +17,7 @@ import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
 import org.slf4j.LoggerFactory
+import com.google.gson.JsonParser
 
 class BitcoinMultiSigService(
     private val apiBaseUrl: String = "https://api.blockcypher.com/v1/btc/test3",
@@ -150,37 +151,33 @@ class BitcoinMultiSigService(
      * 멀티시그 트랜잭션 생성 (서명 1개 포함)
      */
     suspend fun createMultisigTransaction(
-        fromAddress: String,
         toAddress: String,
         amountSatoshi: Long,
-        redeemScriptHex: String,
         privateKeyHex: String,
-        walNum: Int,
         wadNum: Int,
         userId: Int
     ): PartiallySignedTransactionDTO {
 
         try {
-            logger.info("트랜잭션 생성 시작: 발신 주소=${fromAddress}, 수신 주소=${toAddress}, 금액=${amountSatoshi}")
-            
-            // 입력값 유효성 검사
-            if (privateKeyHex.isNullOrBlank()) {
-                throw IllegalArgumentException("개인키가 비어 있습니다.")
-            }
-            
+            val wad = walletAddressesService.selectWAD(wadNum)
+                ?: throw NotFoundException("walletAddresses not found") as Throwable
+            val wadScriptInfo = JsonParser.parseString(wad.wadScriptInfo).asJsonObject
+
+            logger.info("트랜잭션 생성 시작: 발신 주소=${wad.wadAddress}, 수신 주소=${toAddress}, 금액=${amountSatoshi}")
+
             // 개인키 로드
             val privateKey = normalizePrivateKey(privateKeyHex)
             
             // 리딤 스크립트 파싱
             val redeemScript = try {
-                Script(Utils.HEX.decode(redeemScriptHex))
+                Script(Utils.HEX.decode(wadScriptInfo.get("redeemScript").asString))
             } catch (e: Exception) {
                 logger.error("리딤 스크립트 파싱 오류: ${e.message}", e)
                 throw IllegalArgumentException("잘못된 리딤 스크립트 형식입니다: ${e.message}")
             }
             
             // UTXO 목록 조회
-            val utxos = blockCypherClient.getUTXOs(fromAddress)
+            val utxos = blockCypherClient.getUTXOs(wad.wadAddress)
             if (utxos.isEmpty()) {
                 throw RuntimeException("사용 가능한 UTXO가 없습니다. 테스트넷 코인이 있는지 확인하세요.")
             }
@@ -214,7 +211,7 @@ class BitcoinMultiSigService(
             
             // 거스름돈 출력 추가 (필요한 경우)
             if (change > 0) {
-                tx.addOutput(Coin.valueOf(change), Address.fromString(params, fromAddress))
+                tx.addOutput(Coin.valueOf(change), Address.fromString(params, wad.wadAddress))
             }
 
             // 첫 번째 입력에 대한 서명 생성
@@ -226,7 +223,7 @@ class BitcoinMultiSigService(
                 transactionHex = Utils.HEX.encode(tx.bitcoinSerialize())
                 signatureHex = Utils.HEX.encode(txSig.encodeToBitcoin())
                 publicKeyHex = privateKey.publicKeyAsHex
-                this.redeemScriptHex = redeemScriptHex
+                this.redeemScriptHex = wadScriptInfo.get("redeemScript").asString
             }
 
             val gson = com.google.gson.Gson()
@@ -238,12 +235,12 @@ class BitcoinMultiSigService(
                 trxFee = (estimatedFee.toDouble() / 100_000_000.0).toString(),     // 계산된 수수료
                 trxStatus = "created",                                              // 고정값
                 trxScriptInfo = scriptInfoJson,                                     // PartiallySignedTransactionDTO JSON
-                walNum = walNum,                                                    // 화면에서 받은 지갑 번호
+                walNum = wad.walNum,
                 wadNum = wadNum                                                     // 화면에서 받은 주소 번호
             )
 
             val trxNum = transactionsService.insertTRX(transactionRequest, userId)
-            logger.info("Transaction saved to DB - TrxNum: $trxNum, WalNum: $walNum, WadNum: $wadNum, UserId: $userId")
+            logger.info("Transaction saved to DB - TrxNum: $trxNum, WadNum: $wadNum, UserId: $userId")
 
             return result
         } catch (e: Exception) {
@@ -256,20 +253,27 @@ class BitcoinMultiSigService(
      * 멀티시그 트랜잭션 서명 추가 (두 번째 서명)
      */
     suspend fun addSignatureToTransaction(
-        partialTx: PartiallySignedTransactionDTO,
+        trxNum: Int,
         privateKeyHex: String
     ): String {
 
         try {
+            val trx = transactionsService.selectTRX(trxNum)
+                ?: throw NotFoundException("Transaction not found") as Throwable
+            val trxScriptInfo = JsonParser.parseString(trx.trxScriptInfo).asJsonObject
+            val wad = walletAddressesService.selectWAD(trx.wadNum)
+                ?: throw NotFoundException("Transaction not found") as Throwable
+            val wadScriptInfo = JsonParser.parseString(wad.wadScriptInfo).asJsonObject
+
             // 개인키 로드
             val privateKey = normalizePrivateKey(privateKeyHex)
             
             // 트랜잭션 복원
-            val txBytes = Utils.HEX.decode(partialTx.transactionHex)
+            val txBytes = Utils.HEX.decode(trxScriptInfo.get("transactionHex").asString)
             val tx = Transaction(params, txBytes)
 
             // 리딤 스크립트 복원
-            val redeemScript = Script(Utils.HEX.decode(partialTx.redeemScriptHex))
+            val redeemScript = Script(Utils.HEX.decode(wadScriptInfo.get("redeemScript").asString))
 
             // 모든 입력에 서명 적용
             for (i in 0 until tx.inputs.size) {
@@ -281,7 +285,7 @@ class BitcoinMultiSigService(
                 val txSig2 = TransactionSignature(sig2, Transaction.SigHash.ALL, false)
 
                 // 첫 번째 서명 복원
-                val sig1Bytes = Utils.HEX.decode(partialTx.signatureHex)
+                val sig1Bytes = Utils.HEX.decode(trxScriptInfo.get("signatureHex").asString)
                 val txSig1 = TransactionSignature.decodeFromBitcoin(sig1Bytes, false, true) // requireCanonical 추가
 
                 // 서명 스크립트 생성 (OP_0 <sig1> <sig2> <redeemScript>)
