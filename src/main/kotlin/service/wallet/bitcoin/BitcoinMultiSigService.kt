@@ -254,7 +254,8 @@ class BitcoinMultiSigService(
      */
     suspend fun addSignatureToTransaction(
         trxNum: Int,
-        privateKeyHex: String
+        privateKeyHex: String,
+        userId: Int
     ): String {
 
         try {
@@ -302,6 +303,36 @@ class BitcoinMultiSigService(
             val txHex = Utils.HEX.encode(tx.bitcoinSerialize())
             val txId = blockCypherClient.broadcastTransaction(txHex)
                 ?: throw RuntimeException("트랜잭션 브로드캐스트 실패")
+
+            // 브로드캐스트 성공 시 트랜잭션 상태 업데이트
+            try {
+                val now = java.time.LocalDateTime.now()
+                val currentDate = now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"))
+                val currentTime = now.format(java.time.format.DateTimeFormatter.ofPattern("HHmmss"))
+                
+                val updateRequest = TransactionsRequestDTO(
+                    trxNum = trxNum,
+                    trxToAddr = trx.trxToAddr,
+                    trxAmount = trx.trxAmount,
+                    trxFee = trx.trxFee,
+                    trxStatus = "pending",                  // 상태를 'pending'으로 업데이트
+                    trxTxId = txId,                         // 브로드캐스트 응답 TrxId
+                    trxScriptInfo = trx.trxScriptInfo,
+                    trxConfirmedDat = currentDate,          // 현재날짜 YYYYMMDD
+                    trxConfirmedTim = currentTime,          // 현재시간 HHMMSS
+                    walNum = trx.walNum,
+                    wadNum = trx.wadNum
+                )
+                
+                val updateResult = transactionsService.updateTRX(updateRequest, userId)
+                if (updateResult) {
+                    logger.info("Transaction status updated successfully - TrxNum: $trxNum, TxId: $txId, Status: pending")
+                } else {
+                    logger.warn("Failed to update transaction status - TrxNum: $trxNum")
+                }
+            } catch (updateException: Exception) {
+                logger.error("Failed to update transaction status after broadcast - TrxNum: $trxNum, TxId: $txId", updateException)
+            }
 
             // 트랜잭션 ID 반환
             return txId

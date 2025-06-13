@@ -68,12 +68,17 @@ fun Route.bitcoinRoutes(
                 // 비트코인 멀티시그 트랜잭션 완료 (두 번째 서명)
                 post("/transaction/complete") {
                     try {
+                        val principal = call.principal<JWTPrincipal>()
+                        val userId = principal?.let { JwtUtil.extractUserId(it) }
+                            ?: throw BadRequestException("User authentication required")
+
                         val request = call.receive<BitcoinCompleteRequestDTO>()
 
                         val txId = dbQuery {
                             bitcoinMultiSigService.addSignatureToTransaction(
                                 request.trxNum,
                                 request.privateKeyHex,
+                                userId
                             )
                         }
 
