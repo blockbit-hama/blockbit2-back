@@ -3,6 +3,7 @@ package com.sg.service
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletsResponseDTO
 import com.sg.dto.WalletDetailsResponseDTO
+import com.sg.dto.WalletUsersResponseDTO
 import com.sg.repository.WalletsRepository
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -95,5 +96,9 @@ class WalletsService(
     
     fun selectWADList(usiNum: Int, offset: Int?, limit: Int?): List<WalletDetailsResponseDTO> {
         return walletsRepository.selectWADList(usiNum, offset, limit)
+    }
+    
+    fun selectWalletUsersList(walNum: Int, offset: Int?, limit: Int?): List<WalletUsersResponseDTO> {
+        return walletsRepository.selectWalletUsersList(walNum, offset, limit)
     }
 }

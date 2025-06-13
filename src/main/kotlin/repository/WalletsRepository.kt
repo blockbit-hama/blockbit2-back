@@ -3,6 +3,7 @@ package com.sg.repository
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletsResponseDTO
 import com.sg.dto.WalletDetailsResponseDTO
+import com.sg.dto.WalletUsersResponseDTO
 import org.jetbrains.exposed.sql.*
 
 object WalletsTable : Table("wallets") {
@@ -124,5 +125,26 @@ class WalletsRepository {
                 }
             }
             .map { WalletDetailsResponseDTO.fromJoinedResultRow(it) }
+    }
+
+    fun selectWalletUsersList(walNum: Int, offset: Int?, limit: Int?): List<WalletUsersResponseDTO> {
+        return WalletsTable
+            .join(WalUsiMappTable, JoinType.INNER, WalletsTable.walNum, WalUsiMappTable.walNum)
+            .join(UserInfoTable, JoinType.INNER, WalUsiMappTable.usiNum, UserInfoTable.usiNum)
+            .select { 
+                (WalletsTable.walNum eq walNum) and 
+                (WalletsTable.active eq "1") and 
+                (WalUsiMappTable.active eq "1") and
+                (UserInfoTable.active eq "1")
+            }
+            .orderBy(WalUsiMappTable.wumNum to SortOrder.DESC)
+            .let { query ->
+                if (offset != null && limit != null) {
+                    query.limit(limit, offset.toLong())
+                } else {
+                    query
+                }
+            }
+            .map { WalletUsersResponseDTO.fromJoinedResultRow(it) }
     }
 }

@@ -18,7 +18,9 @@ fun Route.userInfoRoute(userInfoService: UserInfoService) {
     route("/api/users") {
         // 모든 사용자 조회
         get {
-            val users = userInfoService.getAllUsers()
+            val users = dbQuery {
+                userInfoService.getAllUsers()
+            }
             call.respond(HttpStatusCode.OK, SuccessResponse(data = users))
         }
         

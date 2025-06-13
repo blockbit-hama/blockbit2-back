@@ -112,6 +112,23 @@ fun Route.walletsRoute(walletsService: WalletsService) {
                     call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
                 }
             }
+            
+            // 특정 지갑과 이해관계가 있는 사용자 정보들 조회 (user_info + wal_usi_mapp 조인)
+            route("/users") {
+                get("/list/{walNum}") {
+                    val walNum = call.parameters["walNum"]?.toIntOrNull()
+                        ?: throw BadRequestException("Valid wal_num is required")
+                    
+                    val offset = call.request.queryParameters["offset"]?.toIntOrNull()
+                    val limit = call.request.queryParameters["limit"]?.toIntOrNull()
+
+                    val result = dbQuery {
+                        walletsService.selectWalletUsersList(walNum, offset, limit)
+                    }
+                    
+                    call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
+                }
+            }
         }
     }
 }
