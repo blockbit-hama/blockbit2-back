@@ -40,7 +40,9 @@ fun Route.userInfoRoute(userInfoService: UserInfoService) {
         // 신규 사용자 등록
         post {
             val userDTO = call.receive<UserInfoDTO>()
-            val usiNum = userInfoService.addUser(userDTO)
+            val usiNum = dbQuery {
+                    userInfoService.addUser(userDTO)
+                }
             call.respond(
                 HttpStatusCode.Created, 
                 SuccessResponse(

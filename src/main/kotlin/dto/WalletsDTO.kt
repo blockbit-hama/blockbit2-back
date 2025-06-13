@@ -3,6 +3,7 @@ package com.sg.dto
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.ResultRow
 import com.sg.repository.WalletsTable
+import com.sg.repository.WalUsiMappTable
 import com.sg.dto.common.CommonResponseDTO
 import com.sg.dto.common.CommonRequestDTO
 
@@ -33,6 +34,79 @@ data class WalletsRequestDTO(
         }
         require(walStatus in listOf("frozen", "archived", "active")) { 
             "Wallet status must be one of: frozen, archived, active" 
+        }
+    }
+}
+
+@Serializable
+data class WalletDetailsResponseDTO(
+    // Wallets 테이블 정보 (주요 정보)
+    val walNum: Int,                    // 지갑 번호
+    val walName: String,                // 지갑명
+    val walType: String,                // 지갑 타입
+    val walProtocol: String,            // 지갑 프로토콜
+    val walStatus: String,              // 지갑 상태
+    val astNum: Int?,                   // 자산 번호
+    val polNum: Int?,                   // 정책 번호
+    
+    // WalUsiMapp 테이블 정보 (사용자 관련 정보)
+    val wumNum: Int,                    // 매핑 번호
+    val usiNum: Int,                    // 사용자 번호
+    val wumRole: String,                // 지갑에서의 역할 (owner, admin, viewer 등)
+    
+    // 지갑 공통 컬럼
+    val walCreusr: Int?,
+    val walCredat: String?,
+    val walCretim: String?,
+    val walLmousr: Int?,
+    val walLmodat: String?,
+    val walLmotim: String?,
+    val walActive: String,
+    
+    // 매핑 공통 컬럼
+    val wumCreusr: Int?,
+    val wumCredat: String?,
+    val wumCretim: String?,
+    val wumLmousr: Int?,
+    val wumLmodat: String?,
+    val wumLmotim: String?,
+    val wumActive: String
+) {
+    companion object {
+        fun fromJoinedResultRow(row: ResultRow): WalletDetailsResponseDTO {
+            return WalletDetailsResponseDTO(
+                // Wallets 정보
+                walNum = row[WalletsTable.walNum],
+                walName = row[WalletsTable.walName],
+                walType = row[WalletsTable.walType],
+                walProtocol = row[WalletsTable.walProtocol],
+                walStatus = row[WalletsTable.walStatus],
+                astNum = row[WalletsTable.astNum],
+                polNum = row[WalletsTable.polNum],
+                
+                // WalUsiMapp 정보
+                wumNum = row[WalUsiMappTable.wumNum],
+                usiNum = row[WalUsiMappTable.usiNum],
+                wumRole = row[WalUsiMappTable.wumRole],
+                
+                // Wallets 공통 컬럼
+                walCreusr = row[WalletsTable.creusr],
+                walCredat = row[WalletsTable.credat],
+                walCretim = row[WalletsTable.cretim],
+                walLmousr = row[WalletsTable.lmousr],
+                walLmodat = row[WalletsTable.lmodat],
+                walLmotim = row[WalletsTable.lmotim],
+                walActive = row[WalletsTable.active],
+                
+                // WalUsiMapp 공통 컬럼
+                wumCreusr = row[WalUsiMappTable.creusr],
+                wumCredat = row[WalUsiMappTable.credat],
+                wumCretim = row[WalUsiMappTable.cretim],
+                wumLmousr = row[WalUsiMappTable.lmousr],
+                wumLmodat = row[WalUsiMappTable.lmodat],
+                wumLmotim = row[WalUsiMappTable.lmotim],
+                wumActive = row[WalUsiMappTable.active]
+            )
         }
     }
 }

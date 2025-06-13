@@ -2,6 +2,7 @@ package com.sg.repository
 
 import com.sg.dto.WalletsRequestDTO
 import com.sg.dto.WalletsResponseDTO
+import com.sg.dto.WalletDetailsResponseDTO
 import org.jetbrains.exposed.sql.*
 
 object WalletsTable : Table("wallets") {
@@ -104,5 +105,24 @@ class WalletsRepository {
             it[WalletsTable.lmotim] = lmotim
         }
         return updateCount > 0
+    }
+
+    fun selectWADList(usiNum: Int, offset: Int?, limit: Int?): List<WalletDetailsResponseDTO> {
+        return WalletsTable
+            .join(WalUsiMappTable, JoinType.INNER, WalletsTable.walNum, WalUsiMappTable.walNum)
+            .select { 
+                (WalUsiMappTable.usiNum eq usiNum) and 
+                (WalletsTable.active eq "1") and 
+                (WalUsiMappTable.active eq "1")
+            }
+            .orderBy(WalletsTable.walNum to SortOrder.DESC)
+            .let { query ->
+                if (offset != null && limit != null) {
+                    query.limit(limit, offset.toLong())
+                } else {
+                    query
+                }
+            }
+            .map { WalletDetailsResponseDTO.fromJoinedResultRow(it) }
     }
 }

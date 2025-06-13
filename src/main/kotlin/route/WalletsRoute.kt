@@ -95,6 +95,23 @@ fun Route.walletsRoute(walletsService: WalletsService) {
                     SimpleSuccessResponse(message = "Wallet deleted successfully")
                 )
             }
+            
+            // 특정 사용자의 지갑 목록과 상세정보 조회 (wallets + wal_usi_mapp 조인)
+            route("/wad") {
+                get("/list/{usiNum}") {
+                    val usiNum = call.parameters["usiNum"]?.toIntOrNull()
+                        ?: throw BadRequestException("Valid usi_num is required")
+                    
+                    val offset = call.request.queryParameters["offset"]?.toIntOrNull()
+                    val limit = call.request.queryParameters["limit"]?.toIntOrNull()
+
+                    val result = dbQuery {
+                        walletsService.selectWADList(usiNum, offset, limit)
+                    }
+                    
+                    call.respond(HttpStatusCode.OK, SuccessResponse(data = result))
+                }
+            }
         }
     }
 }
