@@ -333,7 +333,7 @@ class BitcoinMultiSigService(
             
             // 총 잔액 계산
             val totalBalance = utxos.sumOf { it.value }
-            
+
             // UTXO 정보를 DTO로 변환
             val utxoItems = utxos.map { utxo ->
                 com.sg.dto.wallet.UTXOItemDTO(
@@ -343,6 +343,10 @@ class BitcoinMultiSigService(
                     valueBTC = String.format("%.8f", utxo.value.toDouble() / 100000000.0),
                     script = utxo.script
                 )
+            }
+
+            if (utxoItems.isEmpty()) {
+                throw RuntimeException("테스트넷 상태를 확인해주세요.")
             }
             
             logger.info("UTXO 조회 완료: 개수=${utxos.size}, 총 금액=${totalBalance} satoshi")
